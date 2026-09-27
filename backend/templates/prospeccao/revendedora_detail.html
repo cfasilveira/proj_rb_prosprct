@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ revendedora.nome_completo }} · RB Prospecta{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ revendedora.nome_completo }}</h1>
+  <div>
+    <a class="btn btn-secondary" href="{% url 'prospeccao:revendedora_nova' %}?editar={{ revendedora.pk }}">Editar</a>
+    <a class="btn btn-danger" href="{% url 'prospeccao:revendedora_delete' revendedora.pk %}">Excluir</a>
+  </div>
+</div>
+
+<section class="card">
+  <dl class="resumo">
+    <dt>Já revende</dt>
+    <dd>{% if revendedora.ja_revende %}<span class="badge ok">sim</span>{% else %}<span class="badge">não</span>{% endif %}</dd>
+
+    <dt>Telefones</dt>
+    <dd>{% for t in revendedora.telefones.all %}{{ t.numero }} ({{ t.get_tipo_display }}){% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</dd>
+
+    <dt>E-mail</dt><dd>{{ revendedora.email|default:"—" }}</dd>
+    <dt>CPF</dt><dd>{{ revendedora.cpf|default:"—" }}</dd>
+    <dt>RG</dt><dd>{{ revendedora.rg|default:"—" }}</dd>
+    <dt>Nascimento</dt><dd>{{ revendedora.data_nascimento|date:"d/m/Y"|default:"—" }}</dd>
+    <dt>Endereço</dt>
+    <dd>{% if revendedora.endereco %}{{ revendedora.endereco }}{% if revendedora.bairro %}, {{ revendedora.bairro }}{% endif %}{% else %}—{% endif %}</dd>
+    <dt>Cidade</dt><dd>{{ revendedora.cidade }}</dd>
+    <dt>CEP</dt><dd>{{ revendedora.cep|default:"—" }}</dd>
+
+    <dt>Vende outras marcas?</dt><dd>{{ revendedora.vende_outras_marcas|yesno:"Sim,Não" }}</dd>
+    <dt>Marcas revendidas</dt>
+    <dd>{% for m in revendedora.marcas_revendidas.all %}{{ m.nome }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</dd>
+
+    <dt>Redes sociais</dt>
+    <dd>
+      {% for r in revendedora.redes.all %}
+        {{ r.rede.nome }} — {{ r.perfil }}{% if r.para_contato %} · contato{% endif %}{% if r.para_seguir %} · seguir{% endif %}{% if not forloop.last %}<br>{% endif %}
+      {% empty %}—{% endfor %}
+    </dd>
+
+    <dt>Interesse em produtos</dt>
+    <dd>{% for i in revendedora.interesses.all %}{{ i.nome }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</dd>
+
+    <dt>Promotora</dt><dd>{{ revendedora.promotora.perfil.nome_completo }}</dd>
+    <dt>Cadastrada em</dt><dd>{{ revendedora.criado_em|date:"d/m/Y H:mm" }}</dd>
+  </dl>
+</section>
+{% endblock %}

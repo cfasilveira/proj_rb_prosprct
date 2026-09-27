@@ -28,6 +28,49 @@ def _valida_regras(telefones, marcas, interesses):
         )
 
 
+def _aplica_relacionamentos(revendedora, telefones, marcas, interesses, redes):
+    """Recria todos os relacionamentos da revendedora (usado por criar e atualizar)."""
+    revendedora.telefones.all().delete()
+    for tel in telefones:
+        t = Telefone(
+            revendedora=revendedora,
+            numero=tel["numero"],
+            tipo=tel.get("tipo", "whatsapp"),
+            principal=tel.get("principal", False),
+        )
+        t.full_clean()
+        t.save()
+
+    revendedora.interesses_vinculados.all().delete()
+    for interesse_id in interesses:
+        produto = ProdutoInteresse.objects.get(pk=interesse_id, ativa=True)
+        RevendedoraInteresse.objects.create(revendedora=revendedora, produto=produto)
+
+    revendedora.marcas_vinculadas.all().delete()
+    if marcas is not None:
+        for nome in marcas:
+            nome = nome.strip()
+            if not nome:
+                continue
+            marca, _ = Marca.objects.get_or_create(nome__iexact=nome, defaults={"nome": nome})
+            RevendedoraMarca.objects.create(revendedora=revendedora, marca=marca)
+
+    revendedora.redes.all().delete()
+    for rede in redes or []:
+        if not rede.get("perfil"):
+            continue
+        objeto_rede = RedeSocial.objects.get(pk=rede["rede_id"])
+        RedeSocialVinculo.objects.create(
+            revendedora=revendedora,
+            rede=objeto_rede,
+            perfil=rede["perfil"],
+            para_contato=rede.get("para_contato", False),
+            para_seguir=rede.get("para_seguir", False),
+        )
+
+    revendedora.atualizar_ja_revende()
+
+
 @transaction.atomic
 def criar_revendedora(
     *,
@@ -41,7 +84,7 @@ def criar_revendedora(
     """Cria revendedora + relacionamentos em transação.
 
     dados: campos simples (nome_completo, cpf, rg, email, data_nascimento,
-           endereco, bairro, cidade_id, cep, vende_outras_marcas, observacao).
+           endereco, bairro, cidade, cep, vende_outras_marcas, observacao).
     telefones: [{"numero": ..., "tipo": ..., "principal": bool}]
     marcas: nomes das marcas revendidas (None = não vende outras marcas)
     interesses: ids de ProdutoInteresse
@@ -60,41 +103,36 @@ def criar_revendedora(
     revendedora.full_clean()
     revendedora.save()
 
-    for tel in telefones:
-        t = Telefone(
-            revendedora=revendedora,
-            numero=tel["numero"],
-            tipo=tel.get("tipo", "whatsapp"),
-            principal=tel.get("principal", False),
-        )
-        t.full_clean()
-        t.save()
+    _aplica_relacionamentos(revendedora, telefones, marcas, interesses, redes)
+    return revendedora
 
-    for interesse_id in interesses:
-        produto = ProdutoInteresse.objects.get(pk=interesse_id, ativa=True)
-        RevendedoraInteresse.objects.create(revendedora=revendedora, produto=produto)
 
-    if marcas is not None:
-        for nome in marcas:
-            nome = nome.strip()
-            if not nome:
-                continue
-            marca, _ = Marca.objects.get_or_create(nome__iexact=nome, defaults={"nome": nome})
-            RevendedoraMarca.objects.create(revendedora=revendedora, marca=marca)
+@transaction.atomic
+def atualizar_revendedora(
+    revendedora: Revendedora,
+    *,
+    dados: dict,
+    telefones: list[dict],
+    marcas: list[str] | None,
+    interesses: list[int],
+    redes: list[dict] | None,
+) -> Revendedora:
+    """Atualiza revendedora existente e recria relacionamentos."""
+    if dados.get("vende_outras_marcas") and marcas is None:
+        marcas = []
+    if not dados.get("vende_outras_marcas"):
+        marcas = None
+    if marcas is not None and len(marcas) == 0:
+        marcas = []
 
-    for rede in redes or []:
-        if not rede.get("perfil"):
-            continue
-        objeto_rede = RedeSocial.objects.get(pk=rede["rede_id"])
-        RedeSocialVinculo.objects.create(
-            revendedora=revendedora,
-            rede=objeto_rede,
-            perfil=rede["perfil"],
-            para_contato=rede.get("para_contato", False),
-            para_seguir=rede.get("para_seguir", False),
-        )
+    _valida_regras(telefones, marcas, interesses)
 
-    revendedora.atualizar_ja_revende()
+    for campo, valor in dados.items():
+        setattr(revendedora, campo, valor)
+    revendedora.full_clean()
+    revendedora.save()
+
+    _aplica_relacionamentos(revendedora, telefones, marcas, interesses, redes)
     return revendedora
 
 

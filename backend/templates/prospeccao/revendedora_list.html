@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Revendedoras · RB Prospecta{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Revendedoras</h1>
+  <a href="{% url 'prospeccao:revendedora_nova' %}" class="btn btn-primary">+ Nova revendedora</a>
+</div>
+
+{% if revendedoras %}
+<table class="tabela">
+  <thead>
+    <tr><th>Nome</th><th>Cidade</th><th>Promotora</th><th>Já revende</th><th>Cadastro</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for r in revendedoras %}
+    <tr>
+      <td><a href="{% url 'prospeccao:revendedora_detail' r.pk %}">{{ r.nome_completo }}</a></td>
+      <td>{{ r.cidade }}</td>
+      <td>{{ r.promotora.perfil.nome_completo }}</td>
+      <td>{% if r.ja_revende %}<span class="badge ok">sim</span>{% else %}<span class="badge">não</span>{% endif %}</td>
+      <td>{{ r.criado_em|date:"d/m/Y H:mm" }}</td>
+      <td class="acoes">
+        <a class="btn btn-ghost-dark btn-sm" href="{% url 'prospeccao:revendedora_nova' %}?editar={{ r.pk }}">Editar</a>
+        <a class="btn btn-ghost-dark btn-sm" href="{% url 'prospeccao:revendedora_delete' r.pk %}">Excluir</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="vazio card">
+  <p>Nenhuma revendedora ainda.</p>
+  <a href="{% url 'prospeccao:revendedora_nova' %}" class="btn btn-primary">+ Nova revendedora</a>
+</div>
+{% endif %}
+{% endblock %}

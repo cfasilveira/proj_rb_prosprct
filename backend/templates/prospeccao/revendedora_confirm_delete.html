@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Excluir revendedora · RB Prospecta{% endblock %}
+{% block content %}
+<section class="card login-card">
+  <h1>Excluir revendedora?</h1>
+  <p><strong>{{ revendedora.nome_completo }}</strong> sairá da sua carteira. Esta ação não apaga o histórico de auditoria.</p>
+  <form method="post">
+    {% csrf_token %}
+    <div class="wizard-nav">
+      <a href="{% url 'prospeccao:revendedora_detail' revendedora.pk %}" class="btn btn-secondary">Cancelar</a>
+      <button type="submit" class="btn btn-danger">Excluir</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

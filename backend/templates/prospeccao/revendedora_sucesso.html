@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Sucesso · RB Prospecta{% endblock %}
+{% block content %}
+<section class="card sucesso-card">
+  <div class="sucesso-icone" aria-hidden="true">✓</div>
+  <h1>Revendedora salva com sucesso</h1>
+  <p class="caption">Cadastro disponível na sua carteira.</p>
+  <div class="wizard-nav center">
+    <a href="{% url 'prospeccao:revendedora_nova' %}" class="btn btn-secondary">+ Nova revendedora</a>
+    <a href="{% url 'prospeccao:revendedora_list' %}" class="btn btn-primary">Ver lista</a>
+  </div>
+</section>
+{% endblock %}

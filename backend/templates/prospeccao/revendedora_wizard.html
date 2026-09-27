@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+{% block title %}{{ editando|yesno:"Editar, Nova" }} revendedora · RB Prospecta{% endblock %}
+{% block content %}
+
+<nav class="stepper" aria-label="Progresso do cadastro">
+  <span class="step {% if revisao or etapa > 1 %}done{% elif etapa == 1 %}current{% endif %}">
+    <span class="step-dot">{% if revisao or etapa > 1 %}✓{% else %}1{% endif %}</span>
+    <span class="step-label">Contato</span>
+  </span>
+  <span class="step {% if revisao or etapa > 2 %}done{% elif etapa == 2 %}current{% endif %}"
+        {% if etapa == 2 %}aria-current="step"{% endif %}>
+    <span class="step-dot">{% if revisao or etapa > 2 %}✓{% else %}2{% endif %}</span>
+    <span class="step-label">Endereço</span>
+  </span>
+  <span class="step {% if revisao or etapa > 3 %}done{% elif etapa == 3 %}current{% endif %}"
+        {% if etapa == 3 %}aria-current="step"{% endif %}>
+    <span class="step-dot">{% if revisao or etapa > 3 %}✓{% else %}3{% endif %}</span>
+    <span class="step-label">Mercado</span>
+  </span>
+  <span class="step {% if revisao or etapa > 4 %}done{% elif etapa == 4 %}current{% endif %}"
+        {% if etapa == 4 %}aria-current="step"{% endif %}>
+    <span class="step-dot">{% if revisao or etapa > 4 %}✓{% else %}4{% endif %}</span>
+    <span class="step-label">Interesse</span>
+  </span>
+  <span class="step {% if revisao %}current{% endif %}">
+    <span class="step-dot">5</span>
+    <span class="step-label">Revisão</span>
+  </span>
+</nav>
+
+{% if erros %}
+<div class="msg error summario" role="alert" aria-live="polite">
+  <strong>Corrija:</strong>
+  <ul>
+    {% for campo, lista in erros.items %}{% for e in lista %}<li>{{ e }}</li>{% endfor %}{% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{% if etapa == 1 %}
+<section class="card">
+  <h1>Contato</h1>
+  <p class="caption">Colete os dados falando com a revendedora. Campos com * são obrigatórios.</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="etapa" value="1">
+    <input type="hidden" name="acao" value="avancar">
+
+    <div class="field">
+      <label for="id_nome_completo">Nome completo *</label>
+      {{ form.nome_completo }}
+      {% for e in form.nome_completo.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+    </div>
+
+    <div class="field">
+      <label for="id_email">E-mail</label>
+      {{ form.email }}
+      {% for e in form.email.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+    </div>
+
+    <fieldset class="field">
+      <legend>Telefones / WhatsApp * <span class="caption">(DDD + número)</span></legend>
+      <div id="telefones">
+        {% for tel in telefones_input %}
+        <div class="linha-removivel">
+          <input type="tel" name="telefone" value="{{ tel }}" placeholder="(00) 00000-0000"
+                 data-mask="tel" inputmode="tel" aria-label="Telefone {{ forloop.counter }}">
+          {% if not forloop.first %}
+            <button type="button" class="btn-remove remove-linha" aria-label="Remover telefone">✕</button>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% if erros.telefones %}<p class="field-error">{{ erros.telefones|first }}</p>{% endif %}
+      {% if telefones_input|length < 3 %}
+        <button type="button" class="btn btn-secondary btn-sm" id="add-telefone">+ Outro telefone</button>
+      {% endif %}
+    </fieldset>
+
+    <fieldset class="field">
+      <legend>Redes sociais <span class="caption">(qual é para contato e seguir)</span></legend>
+      <div id="redes">
+        {% for r in redes_input %}
+        <div class="rede-linha card-inset">
+          <select name="rede_id_{{ forloop.counter0 }}" aria-label="Rede social {{ forloop.counter }}">
+            <option value="">Rede…</option>
+            {% for rede in redes %}
+              <option value="{{ rede.id }}" {% if r.rede_id == rede.id %}selected{% endif %}>{{ rede.nome }}</option>
+            {% endfor %}
+          </select>
+          <input type="text" name="rede_perfil_{{ forloop.counter0 }}" value="{{ r.perfil }}"
+                 placeholder="@perfil ou link" aria-label="Perfil {{ forloop.counter }}">
+          <label class="check-inline"><input type="checkbox" name="rede_contato_{{ forloop.counter0 }}"
+                 {% if r.contato %}checked{% endif %}> contato</label>
+          <label class="check-inline"><input type="checkbox" name="rede_seguir_{{ forloop.counter0 }}"
+                 {% if r.seguir %}checked{% endif %}> seguir</label>
+        </div>
+        {% endfor %}
+      </div>
+      {% for campo, lista in erros.items %}{% if "rede_id" in campo %}
+        <p class="field-error">{{ lista|first }}</p>
+      {% endif %}{% endfor %}
+      <button type="button" class="btn btn-secondary btn-sm" id="add-rede">+ Outra rede</button>
+    </fieldset>
+
+    <div class="wizard-nav">
+      <span></span>
+      <button type="submit" class="btn btn-primary">Próximo →</button>
+    </div>
+  </form>
+</section>
+{% endif %}
+
+{% if etapa == 2 %}
+<section class="card">
+  <h1>Endereço e nascimento</h1>
+  <p class="caption">Opcional, exceto cidade — usada nas análises territoriais.</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="etapa" value="2">
+    <input type="hidden" name="acao" value="avancar">
+
+    <div class="grid-2">
+      <div class="field">
+        <label for="id_cpf">CPF</label>
+        {{ form.cpf }}
+        {% for e in form.cpf.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+      </div>
+      <div class="field">
+        <label for="id_rg">RG</label>
+        {{ form.rg }}
+        {% for e in form.rg.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="id_data_nascimento">Data de nascimento</label>
+      {{ form.data_nascimento }}
+      {% for e in form.data_nascimento.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+    </div>
+
+    <div class="field">
+      <label for="id_cep">CEP</label>
+      {{ form.cep }}
+      {% for e in form.cep.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+    </div>
+
+    <div class="field">
+      <label for="id_endereco">Endereço</label>
+      {{ form.endereco }}
+      {% for e in form.endereco.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label for="id_bairro">Bairro</label>
+        {{ form.bairro }}
+        {% for e in form.bairro.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+      </div>
+      <div class="field">
+        <label for="id_cidade_nome">Cidade *</label>
+        {{ form.cidade_nome }}
+        <datalist id="cidade-list">
+          {% for c in cidades %}<option value="{{ c.nome }}">{% endfor %}
+        </datalist>
+        {% for e in form.cidade_nome.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+      </div>
+    </div>
+
+    <div class="field field-uf">
+      <label for="id_cidade_uf">UF *</label>
+      {{ form.cidade_uf }}
+      {% for e in form.cidade_uf.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+      {% if erros.cidade %}<p class="field-error">{{ erros.cidade|first }}</p>{% endif %}
+    </div>
+
+    <div class="wizard-nav">
+      <button type="submit" name="acao" value="voltar" class="btn btn-secondary">← Voltar</button>
+      <button type="submit" class="btn btn-primary">Próximo →</button>
+    </div>
+  </form>
+</section>
+{% endif %}
+
+{% if etapa == 3 %}
+<section class="card">
+  <h1>Mercado</h1>
+  <p class="caption">Ela já revende outras marcas? Isso define o indicador “já revende”.</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="etapa" value="3">
+    <input type="hidden" name="acao" value="avancar">
+
+    <fieldset class="field">
+      <legend>Vende outras marcas? *</legend>
+      <div class="radio-row">
+        {% for radio in form.vende_outras_marcas %}
+          <label class="radio-op">{{ radio.tag }} {{ radio.choice_label }}</label>
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <fieldset class="field" id="bloco-marcas">
+      <legend>Quais marcas? * <span class="caption">(múltipla escolha)</span></legend>
+      <div class="chips">
+        {% for marca in marcas %}
+        <label class="chip {% if marca.nome in marcas_draft %}on{% endif %}">
+          <input type="checkbox" name="marca_id" value="{{ marca.id }}"
+                 {% if marca.nome in marcas_draft %}checked{% endif %}>
+          {{ marca.nome }}
+        </label>
+        {% endfor %}
+      </div>
+      <div class="field field-inline">
+        <label for="id_marca_nova">Outra marca</label>
+        <input type="text" name="marca_nova" id="id_marca_nova" value="{{ draft.marca_nova|default:'' }}"
+               placeholder="Nome da marca">
+      </div>
+      {% if erros.marcas %}<p class="field-error">{{ erros.marcas|first }}</p>{% endif %}
+    </fieldset>
+
+    <div class="wizard-nav">
+      <button type="submit" name="acao" value="voltar" class="btn btn-secondary">← Voltar</button>
+      <button type="submit" class="btn btn-primary">Próximo →</button>
+    </div>
+  </form>
+</section>
+{% endif %}
+
+{% if etapa == 4 %}
+<section class="card">
+  <h1>Interesse em produtos</h1>
+  <p class="caption">Quais produtos ela tem interesse em revender? *</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="etapa" value="4">
+    <input type="hidden" name="acao" value="avancar">
+
+    <div class="chips">
+      {% for p in interesses %}
+      <label class="chip {% if p in interesses_draft %}on{% endif %}">
+        <input type="checkbox" name="interesse_id" value="{{ p.id }}"
+               {% if p in interesses_draft %}checked{% endif %}>
+        {{ p.nome }}
+      </label>
+      {% endfor %}
+    </div>
+    {% if erros.interesses %}<p class="field-error">{{ erros.interesses|first }}</p>{% endif %}
+
+    <div class="wizard-nav">
+      <button type="submit" name="acao" value="voltar" class="btn btn-secondary">← Voltar</button>
+      <button type="submit" class="btn btn-primary">Revisar →</button>
+    </div>
+  </form>
+</section>
+{% endif %}
+
+{% if revisao %}
+<section class="card">
+  <h1>Revisão</h1>
+  <p class="caption">Confira antes de salvar.</p>
+
+  <dl class="resumo">
+    <dt>Nome</dt><dd>{{ draft.nome_completo }}</dd>
+    <dt>Telefones</dt><dd>{{ draft.telefones|join:", "|default:"—" }}</dd>
+    <dt>E-mail</dt><dd>{{ draft.email|default:"—" }}</dd>
+
+    {% if resumo_redes %}
+    <dt>Redes sociais</dt>
+    <dd>
+      {% for r in resumo_redes %}
+        {{ r.nome }} — {{ r.perfil }}{% if r.contato %} · contato{% endif %}{% if r.seguir %} · seguir{% endif %}{% if not forloop.last %}<br>{% endif %}
+      {% endfor %}
+    </dd>
+    {% endif %}
+
+    <dt>CPF</dt><dd>{{ draft.cpf|default:"—" }}</dd>
+    <dt>RG</dt><dd>{{ draft.rg|default:"—" }}</dd>
+    <dt>Nascimento</dt><dd>{{ draft.data_nascimento|default:"—" }}</dd>
+    <dt>Endereço</dt>
+    <dd>{% if draft.endereco %}{{ draft.endereco }}{% if draft.bairro %}, {{ draft.bairro }}{% endif %}{% else %}—{% endif %}</dd>
+    <dt>Cidade</dt><dd>{{ draft.cidade_nome }}/{{ draft.cidade_uf }}</dd>
+    <dt>CEP</dt><dd>{{ draft.cep|default:"—" }}</dd>
+
+    <dt>Vende outras marcas?</dt><dd>{{ draft.vende_outras_marcas|yesno:"Sim,Não" }}</dd>
+    <dt>Marcas</dt>
+    <dd>
+      {% if draft.vende_outras_marcas == "sim" %}
+        {{ marcas_draft|join:", " }}{% if draft.marca_nova %}{% if marcas_draft %}, {% endif %}{{ draft.marca_nova }}{% endif %}
+      {% else %}—{% endif %}
+    </dd>
+
+    <dt>Interesse em produtos</dt>
+    <dd>{% for i in interesses_draft %}{{ i.nome }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</dd>
+  </dl>
+
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="etapa" value="5">
+    <input type="hidden" name="acao" value="salvar">
+    <div class="wizard-nav">
+      <button type="submit" name="acao" value="voltar" class="btn btn-secondary">← Voltar</button>
+      <button type="submit" class="btn btn-primary">
+        {% if editando %}Salvar alterações{% else %}Salvar cadastro{% endif %}
+      </button>
+    </div>
+  </form>
+</section>
+{% endif %}
+
+{% endblock %}
