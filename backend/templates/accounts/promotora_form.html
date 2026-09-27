@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} · RB Prospecta{% endblock %}
+{% block content %}
+<section class="card login-card">
+  <h1>{{ titulo }}</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    {% for campo in form %}
+    <div class="field">
+      <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+      {{ campo }}
+      {% if campo.help_text %}<p class="caption">{{ campo.help_text }}</p>{% endif %}
+      {% for e in campo.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+    </div>
+    {% endfor %}
+
+    <div class="wizard-nav">
+      <a href="{% url 'accounts:promotora_list' %}" class="btn btn-secondary">Cancelar</a>
+      <button type="submit" class="btn btn-primary">Salvar</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

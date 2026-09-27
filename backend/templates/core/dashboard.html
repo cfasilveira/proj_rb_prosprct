@@ -1,6 +1,92 @@
 {% extends "base.html" %}
 {% block title %}Dashboard · RB Prospecta{% endblock %}
 {% block content %}
-<h1>Dashboard</h1>
-<p>Implementado na etapa E4 do <a href="https://github.com/cfasilveira/proj_rb_prosprct">plano</a>.</p>
+
+<div class="page-head">
+  <h1>Olá, {{ perfil.nome_completo|default:user.email }}</h1>
+  <nav class="filtros-periodo" aria-label="Período">
+    {% for chave, nome in periodos.items %}
+      <a href="?periodo={{ chave }}" class="chip {% if periodo == chave %}on{% endif %}">{{ nome }}</a>
+    {% endfor %}
+  </nav>
+</div>
+
+<section class="kpis">
+  <article class="card kpi">
+    <p class="kpi-label">Cadastradas</p>
+    <p class="kpi-num">{{ total }}</p>
+  </article>
+  <article class="card kpi">
+    <p class="kpi-label">Já revendem</p>
+    <p class="kpi-num">{{ ja_revendem }}</p>
+  </article>
+  <article class="card kpi">
+    <p class="kpi-label">Conversão</p>
+    <p class="kpi-num">{{ pct }}%</p>
+  </article>
+  {% if perfil.is_gestor %}
+  <article class="card kpi kpi-acao">
+    <p class="kpi-label">Análises</p>
+    <a class="btn btn-primary" href="#" title="Streamlit disponível na etapa E5">Abrir análises ↗</a>
+    <a class="btn btn-ghost-dark btn-sm" href="{% url 'accounts:promotora_list' %}">Gerenciar promotoras</a>
+  </article>
+  {% endif %}
+</section>
+
+{% if perfil.is_gestor %}
+<section class="card">
+  <h2>Cadastro por promotora</h2>
+  {% if por_promotora %}
+  <table class="tabela">
+    <thead>
+      <tr><th>Promotora</th><th>Território</th><th>Cadastradas</th><th>Já revendem</th><th>Conversão</th></tr>
+    </thead>
+    <tbody>
+      {% for linha in por_promotora %}
+      <tr>
+        <td>
+          {{ linha.promotora__perfil__nome_completo }}
+          {% if not linha.promotora__perfil__ativo %}<span class="badge">inativa</span>{% endif %}
+        </td>
+        <td>{{ linha.promotora__perfil__territorio|default:"—" }}</td>
+        <td>{{ linha.total }}</td>
+        <td>{{ linha.ja_revendem }}</td>
+        <td>{{ linha.pct }}%</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="caption">Nenhuma revendedora cadastrada ainda.</p>
+  {% endif %}
+</section>
+{% endif %}
+
+<section class="card">
+  <div class="page-head">
+    <h2>Últimos cadastros</h2>
+    <a class="btn btn-secondary btn-sm" href="{% url 'prospeccao:revendedora_list' %}">Ver todos</a>
+  </div>
+  {% if ultimos %}
+  <table class="tabela">
+    <thead><tr><th>Nome</th><th>Cidade</th><th>Já revende</th><th>Cadastro</th></tr></thead>
+    <tbody>
+      {% for r in ultimos %}
+      <tr>
+        <td><a href="{% url 'prospeccao:revendedora_detail' r.pk %}">{{ r.nome_completo }}</a></td>
+        <td>{{ r.cidade }}</td>
+        <td>{% if r.ja_revende %}<span class="badge ok">sim</span>{% else %}<span class="badge">não</span>{% endif %}</td>
+        <td>{{ r.criado_em|date:"d/m/Y H:mm" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="vazio">
+    <p>Nenhuma revendedora ainda.</p>
+    <a href="{% url 'prospeccao:revendedora_nova' %}" class="btn btn-primary">+ Nova revendedora</a>
+  </div>
+  {% endif %}
+</section>
+
 {% endblock %}

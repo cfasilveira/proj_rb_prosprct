@@ -243,3 +243,13 @@ label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
   .step-label { display: none; }
   .step.current .step-label { display: inline; }
 }
+
+/* ---------- Extras E4 ---------- */
+.inline-form { display: inline; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.kpi { text-align: center; padding: 20px 16px; }
+.kpi-label { margin: 0; font-size: 13px; color: var(--cinza); text-transform: uppercase; letter-spacing: 0.04em; }
+.kpi-num { margin: 6px 0 0; font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--azul); }
+.kpi-acao .btn { display: block; width: 100%; margin-top: 8px; }
+.filtros-periodo { display: flex; gap: 8px; flex-wrap: wrap; }
+.filtros-periodo .chip { text-decoration: none; }

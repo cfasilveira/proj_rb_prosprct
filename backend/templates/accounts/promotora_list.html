@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Promotoras · RB Prospecta{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Promotoras</h1>
+  <a href="{% url 'accounts:promotora_nova' %}" class="btn btn-primary">+ Nova promotora</a>
+</div>
+
+<section class="card">
+  {% if promotoras %}
+  <table class="tabela">
+    <thead>
+      <tr><th>Nome</th><th>E-mail</th><th>Território</th><th>Cadastradas</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for p in promotoras %}
+      <tr>
+        <td>{{ p.nome_completo }}</td>
+        <td>{{ p.user.email }}</td>
+        <td>{{ p.territorio|default:"—" }}</td>
+        <td>{{ p.total }} <span class="caption">({{ p.ativas }} ativas)</span></td>
+        <td>
+          {% if p.ativo %}<span class="badge ok">ativa</span>{% else %}<span class="badge">desativada</span>{% endif %}
+        </td>
+        <td class="acoes">
+          <a class="btn btn-ghost-dark btn-sm" href="{% url 'accounts:promotora_editar' p.pk %}">Editar</a>
+          <form method="post" action="{% url 'accounts:promotora_alternar' p.pk %}" class="inline-form">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-ghost-dark btn-sm">
+              {% if p.ativo %}Desativar{% else %}Reativar{% endif %}
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="vazio">
+    <p>Nenhuma promotora cadastrada.</p>
+    <a href="{% url 'accounts:promotora_nova' %}" class="btn btn-primary">+ Nova promotora</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
