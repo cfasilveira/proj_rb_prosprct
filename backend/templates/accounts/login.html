@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Entrar · RB Prospecta{% endblock %}
+{% block content %}
+<section class="card login-card">
+  <h1>Entrar</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    {% if form.errors %}<p class="msg error">E-mail ou senha inválidos.</p>{% endif %}
+    <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,77 @@
+/* RB Prospecta - design tokens (docs/UI_UX_Brief.md) */
+:root {
+  --azul: #1B4DB1;
+  --azul-800: #12357A;
+  --azul-50: #EAF1FD;
+  --verde: #128C5A;
+  --ambar: #C77700;
+  --erro: #C62828;
+  --grafite: #1A1A1A;
+  --cinza: #5F6368;
+  --borda: #DADCE0;
+  --fundo: #F7F8FA;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Inter, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--grafite);
+  background: var(--fundo);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--azul);
+  color: #fff;
+}
+.brand { color: #fff; font-weight: 700; text-decoration: none; font-size: 18px; }
+
+.container { max-width: 1120px; margin: 0 auto; padding: 16px; }
+
+.card {
+  background: #fff;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.login-card { max-width: 400px; margin: 48px auto; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.btn-primary { background: var(--azul); color: #fff; }
+.btn-primary:hover { background: var(--azul-800); }
+.btn-ghost { background: transparent; color: #fff; border-color: rgba(255, 255, 255, 0.5); }
+.btn-block { width: 100%; }
+
+input, select, textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  font-size: 16px;
+  background: #fff;
+}
+input:focus { outline: none; border-color: var(--azul); box-shadow: 0 0 0 3px var(--azul-50); }
+label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+
+.msg { padding: 8px 12px; border-radius: 8px; list-style: none; }
+.msg.error { color: var(--erro); }

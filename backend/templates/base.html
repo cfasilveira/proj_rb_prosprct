@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1B4DB1">
+  <title>{% block title %}RB Prospecta{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+  <header class="topbar">
+    <a href="{% url 'core:dashboard' %}" class="brand">RB Prospecta</a>
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'accounts:logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-ghost">Sair</button>
+      </form>
+    {% endif %}
+  </header>
+  <main class="container">
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}<li class="msg {{ message.tags }}">{{ message }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

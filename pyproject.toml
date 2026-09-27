@@ -1,0 +1,32 @@
+[project]
+name = "rb-prospecta"
+version = "0.1.0"
+description = "RB Prospecta - prospecção de revendedoras para o canal de venda direta"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["backend"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501", # linha longa: formatador cuida
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["config", "core", "accounts", "prospeccao"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.dev"
+pythonpath = ["backend"]
+testpaths = ["backend/tests"]
+addopts = "-q"
