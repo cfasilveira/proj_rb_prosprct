@@ -1,8 +1,10 @@
 # RB Prospecta
 
 Ferramenta de prospecção e cadastro de revendedoras para o canal de venda direta.
+Promotoras coletam os dados em campo (PWA no celular) e o gestor acompanha a carteira
+por dashboard e análises.
 
-**Stack:** Django 5 · PostgreSQL 16 · Streamlit · PWA
+**Stack:** Django 5 · PostgreSQL 16 · Streamlit (análises) · PWA
 
 ## Documentação
 
@@ -33,13 +35,17 @@ python3 -m venv .venv
 # 3. Env
 cp .env.example .env
 
-# 4. Migrations (após existirem)
+# 4. Migrations
 .venv/bin/python backend/manage.py migrate
 
-# 5. Servidor
+# 5. Gestor inicial
+.venv/bin/python backend/manage.py criar_gestor gestor@suaempresa.com \
+    --senha SuaSenhaForte123 --nome "Nome do Gestor"
+
+# 6. Servidor web (PWA) - http://localhost:8000
 .venv/bin/python backend/manage.py runserver
 
-# 6. Análises (Streamlit) - porta 8501, acesso restrito ao gestor
+# 7. Análises (Streamlit) - http://localhost:8501 (só gestor)
 .venv/bin/streamlit run analytics/Home.py
 ```
 
@@ -47,13 +53,42 @@ cp .env.example .env
 
 ```bash
 .venv/bin/ruff check .
-.venv/bin/pytest
+.venv/bin/pytest          # 55 testes
 ```
 
 ## Estrutura
 
 ```
-backend/     # Django (auth, cadastro, dashboard)
-analytics/   # Streamlit (análises A1–A4)
+backend/     # Django: auth, wizard de cadastro, dashboard, PWA
+  config/    # settings base/dev/prod
+  core/      # Perfil, auditoria, dashboard, LGPD
+  accounts/  # User, login, gestão de promotoras
+  prospeccao/# Revendedora + N:N (marcas, produtos, redes)
+analytics/   # Streamlit: análises A1–A4
 docs/        # documentação do produto
 ```
+
+## Deploy (Railway)
+
+1. Conecte o repositório ao Railway (web service + Postgres gerenciado).
+2. Variáveis de ambiente:
+   - `DJANGO_SETTINGS_MODULE=config.settings.prod`
+   - `DATABASE_URL` (fornecido pelo Postgres do Railway)
+   - `SECRET_KEY` (gerado)
+   - `ALLOWED_HOSTS=seu-app.up.railway.app`
+   - `CSRF_TRUSTED_ORIGINS=https://seu-app.up.railway.app`
+3. Build: `pip install -r requirements.txt && python backend/manage.py migrate && python backend/manage.py collectstatic --noinput`
+4. Start: `gunicorn config.wsgi:application --chdir backend --bind 0.0.0.0:$PORT`
+5. Segundo serviço (analytics): `streamlit run analytics/Home.py` com
+   `requirements-analytics` do `analytics/requirements.txt`.
+6. Após o deploy: `python backend/manage.py criar_gestor ...`
+
+## Checklist de aceite do MVP (PRD §7)
+
+- [ ] AC-01 — cadastro completo em ≤ 2 min no celular
+- [ ] AC-02 — CPF duplicado bloqueado com mensagem clara
+- [ ] AC-03 — `ja_revende` coerente em 100% dos testes (automático: `pytest`)
+- [ ] AC-04 — análises A1–A4 coerentes (automático: `pytest`)
+- [ ] AC-05 — escopo por perfil (automático: `pytest`)
+- [ ] AC-06 — PWA instalável (verificar no Chrome/Android após deploy)
+- [ ] Lighthouse: PWA ≥ 90, A11y ≥ 90, Perf ≥ 80 (rodar em produção)

@@ -82,7 +82,7 @@ análises de volume, perfil e interesse.
 ### RF-03 Cadastro de revendedora
 - **RF-03.1:** Campos obrigatórios: nome completo, telefone/WhatsApp.
 - **RF-03.2:** CPF com validação de dígito verificador; **único** no sistema.
-- **RF-03.3:** RG, endereço, bairro, cidade, CEP, data de nascimento (data completa), e-mail são opcionais, com máscaras de validação.
+- **RF-03.3:** RG, endereço, bairro, CEP, data de nascimento (data completa), e-mail são opcionais, com máscaras de validação. **Cidade + UF são obrigatórias** (necessárias para as análises territoriais).
 - **RF-03.4:** Telefone/WhatsApp: aceitar múltiplos números (mínimo 1), com DDD e máscara.
 - **RF-03.5:** "Vende outras marcas?": sim/não. Se sim → seleção múltipla de marcas (livre + pré-cadastradas).
 - **RF-03.6:** Redes sociais: escolher qual é para contato e qual é para seguir; informar perfil/URL. Aceitar múltiplas.

@@ -4,16 +4,20 @@
 **Depende de:** PRD, TRD, App Flow, UI/UX Brief, Backend Schema
 **Stack:** Django 5 + Postgres 16 + Streamlit · **Estimativa:** 6 etapas, ~2 semanas
 
+> **Status (27/09/2026): E1–E6 CONCLUÍDAS.** 55 testes (`pytest`), `ruff` limpo.
+> Pendências operacionais de produção: deploy Railway, auditoria Lighthouse em produção
+> e validação AC-06 (instalação PWA) em dispositivo real — ver README.
+
 ## Visão geral
 
-| Etapa | Entrega | Depende de | Estimativa |
-|---|---|---|---|
-| E1 | Setup do repositório e ambiente | — | 0,5 dia |
-| E2 | Models, migrations e auth | E1 | 1,5 dia |
-| E3 | Formulário de campo (PWA) | E2 | 2 dias |
-| E4 | Dashboard (promotora e gestor) | E3 | 1 dia |
-| E5 | Análises A1–A4 (Streamlit) | E2 | 1 dia |
-| E6 | PWA, polimento e testes | E3–E5 | 1,5 dia |
+| Etapa | Entrega | Depende de | Estimativa | Status |
+|---|---|---|---|---|
+| E1 | Setup do repositório e ambiente | — | 0,5 dia | ✅ concluída |
+| E2 | Models, migrations e auth | E1 | 1,5 dia | ✅ concluída |
+| E3 | Formulário de campo (PWA) | E2 | 2 dias | ✅ concluída |
+| E4 | Dashboard (promotora e gestor) | E3 | 1 dia | ✅ concluída |
+| E5 | Análises A1–A4 (Streamlit) | E2 | 1 dia | ✅ concluída |
+| E6 | PWA, polimento e testes | E3–E5 | 1,5 dia | ✅ concluída |
 
 **Definição de pronto (todas as etapas):** `ruff check . && pytest` verdes +
 aceite visual manual no celular (360px).

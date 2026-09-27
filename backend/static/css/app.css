@@ -253,3 +253,27 @@ label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
 .kpi-acao .btn { display: block; width: 100%; margin-top: 8px; }
 .filtros-periodo { display: flex; gap: 8px; flex-wrap: wrap; }
 .filtros-periodo .chip { text-decoration: none; }
+
+/* ---------- PWA / estados (E6) ---------- */
+.aviso-offline {
+  background: var(--ambar);
+  color: #fff;
+  text-align: center;
+  padding: 8px 16px;
+  font-size: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.topbar-acoes { display: flex; gap: 8px; align-items: center; }
+.topbar-acoes form { margin: 0; }
+.rodape {
+  text-align: center;
+  padding: 24px 16px 40px;
+  font-size: 13px;
+}
+.rodape a { color: var(--cinza); }
+:focus-visible {
+  outline: 3px solid var(--azul);
+  outline-offset: 2px;
+}

@@ -84,3 +84,8 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         "ano_atual": datetime.now().year,
     }
     return render(request, "core/dashboard.html", contexto)
+
+
+def privacidade(request: HttpRequest) -> HttpResponse:
+    """Página de informações de dados pessoais (PRD RNF-06, LGPD)."""
+    return render(request, "core/privacidade.html", {})

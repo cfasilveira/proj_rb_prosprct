@@ -1,0 +1,21 @@
+{
+  "name": "RB Prospecta",
+  "short_name": "RB Prospecta",
+  "description": "Prospecção e cadastro de revendedoras para o canal de venda direta",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F8FA",
+  "theme_color": "#1B4DB1",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/static/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/static/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Nova revendedora", "url": "/revendedoras/nova/" },
+    { "name": "Revendedoras", "url": "/revendedoras/" }
+  ]
+}

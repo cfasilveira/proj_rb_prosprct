@@ -5,20 +5,33 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#1B4DB1">
+  <meta name="description" content="RB Prospecta — prospecção de revendedoras para o canal de venda direta">
+  <link rel="manifest" href="{% static 'manifest.json' %}">
+  <link rel="icon" href="{% static 'favicon-32.png' %}" sizes="32x32">
+  <link rel="icon" href="{% static 'favicon-16.png' %}" sizes="16x16">
+  <link rel="apple-touch-icon" href="{% static 'icon-192.png' %}">
   <title>{% block title %}RB Prospecta{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <script src="{% static 'js/app.js' %}" defer></script>
 </head>
 <body>
+  <div id="aviso-offline" class="aviso-offline" hidden role="status">
+    Você está offline — os dados digitados ficam salvos até a conexão voltar.
+  </div>
+
   <header class="topbar">
     <a href="{% url 'core:dashboard' %}" class="brand">RB Prospecta</a>
-    {% if user.is_authenticated %}
-      <form method="post" action="{% url 'accounts:logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-ghost">Sair</button>
-      </form>
-    {% endif %}
+    <div class="topbar-acoes">
+      <button type="button" id="btn-instalar" class="btn btn-ghost" hidden>Instalar app</button>
+      {% if user.is_authenticated %}
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-ghost">Sair</button>
+        </form>
+      {% endif %}
+    </div>
   </header>
+
   <main class="container">
     {% if messages %}
       <ul class="messages">
@@ -27,5 +40,37 @@
     {% endif %}
     {% block content %}{% endblock %}
   </main>
+
+  <footer class="rodape">
+    <a href="{% url 'core:privacidade' %}">Privacidade e dados (LGPD)</a>
+  </footer>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("{% static 'js/sw.js' %}");
+    }
+    (function () {
+      const aviso = document.getElementById("aviso-offline");
+      function sincroniza() { aviso.hidden = navigator.onLine; }
+      window.addEventListener("online", sincroniza);
+      window.addEventListener("offline", sincroniza);
+      sincroniza();
+
+      let promptInstalar = null;
+      const botao = document.getElementById("btn-instalar");
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        promptInstalar = e;
+        botao.hidden = false;
+      });
+      botao.addEventListener("click", async () => {
+        if (!promptInstalar) return;
+        promptInstalar.prompt();
+        await promptInstalar.userChoice;
+        promptInstalar = null;
+        botao.hidden = true;
+      });
+    })();
+  </script>
 </body>
 </html>
