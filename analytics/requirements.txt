@@ -1,0 +1,8 @@
+# Requisitos do app de análises (Streamlit)
+# Deploy separado do Django (ver docs/TRD.md §1)
+streamlit>=1.40
+plotly>=5.20
+pandas>=2.2
+psycopg[binary]>=3.1
+python-dotenv>=1.0
+django>=5.0,<6.0

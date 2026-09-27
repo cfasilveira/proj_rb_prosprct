@@ -1,20 +1,7 @@
 """Seed: produtos de interesse e redes sociais (PRD RF-03.6/RF-03.7)."""
 from django.db import migrations
 
-PRODUTOS = [
-    "Cosméticos",
-    "Vitaminas",
-    "Suplementos",
-    "Alimentos",
-    "Roupa íntima",
-    "Roupa fitness",
-    "Bijuteria",
-    "Sapato",
-    "Remédios",
-    "Outros",
-]
-
-REDES = ["Instagram", "Facebook", "TikTok", "WhatsApp", "Outra"]
+from prospeccao.seeds import PRODUTOS, REDES
 
 
 def seeds(apps, schema_editor):

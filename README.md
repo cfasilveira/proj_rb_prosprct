@@ -38,6 +38,9 @@ cp .env.example .env
 
 # 5. Servidor
 .venv/bin/python backend/manage.py runserver
+
+# 6. Análises (Streamlit) - porta 8501, acesso restrito ao gestor
+.venv/bin/streamlit run analytics/Home.py
 ```
 
 ## Verificação
