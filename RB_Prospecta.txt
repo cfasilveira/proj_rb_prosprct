@@ -1,0 +1,32 @@
+Analise esse projeto.
+
+Contexto:
+RB Prospecta e uma ferramenta tecnologica para o canal de venda direta.
+Essa ferramenta prospecta e cadastra para o canal de venda direta.
+Cada promotora cadastradas coletara os dados da revendeora em campo atraves do formulario verbalmente.
+
+Formulario:
+- nome completo*
+- telefones / whatsapp *
+- CPF
+- RG
+- endereco 
+- bairro 
+- cidade
+- CEP 
+- data nascimento completo
+- e-mail
+- vende outras marcas se sim quais?
+- redes sociais qual e para contato e seguir
+- quais produtos tem interesse em revender (cosmeticos, vitaminas, suplementos, alimentos, roupa intima, roupa fitiness, bijuteria, sapato, remedio, etc)
+
+cadastro para bd por promotora cadastrada
+
+Analises:
+- qde cadastrada de revendedoras por promotora
+- das revendedoras cadastradas quantas ja revendem
+- quais as marcas que essas revendedoras cadastradas revendem
+- quais produtos tem interesse em revender
+
+
+

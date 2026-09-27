@@ -1,0 +1,137 @@
+# Plano de Implementação — RB Prospecta
+
+**Versão:** 1.0 · **Data:** 27/09/2026
+**Depende de:** PRD, TRD, App Flow, UI/UX Brief, Backend Schema
+**Stack:** Django 5 + Postgres 16 + Streamlit · **Estimativa:** 6 etapas, ~2 semanas
+
+## Visão geral
+
+| Etapa | Entrega | Depende de | Estimativa |
+|---|---|---|---|
+| E1 | Setup do repositório e ambiente | — | 0,5 dia |
+| E2 | Models, migrations e auth | E1 | 1,5 dia |
+| E3 | Formulário de campo (PWA) | E2 | 2 dias |
+| E4 | Dashboard (promotora e gestor) | E3 | 1 dia |
+| E5 | Análises A1–A4 (Streamlit) | E2 | 1 dia |
+| E6 | PWA, polimento e testes | E3–E5 | 1,5 dia |
+
+**Definição de pronto (todas as etapas):** `ruff check . && pytest` verdes +
+aceite visual manual no celular (360px).
+
+---
+
+## E1 — Setup do repositório e ambiente
+
+- [ ] Inicializar git, `.gitignore` (Python/Django/.env), `.editorconfig`
+- [ ] Estrutura de pastas conforme TRD §3 (`backend/`, `analytics/`, `docs/`)
+- [ ] `pyproject.toml` com ruff + pytest (`DJANGO_SETTINGS_MODULE`, `pythonpath = backend`)
+- [ ] `docker-compose.yml` só com Postgres 16 (porta 5432, volume, healthcheck)
+- [ ] venv + `requirements.txt`/`requirements-dev.txt` (Django, psycopg, localflavor, whitenoise, pytest-django, ruff)
+- [ ] `config/settings/{base,dev,prod}.py` + `.env.example`
+- [ ] `manage.py runserver` + `docker compose up -d db` funcionando
+- [ ] README: como subir o projeto
+
+**Checkpoint E1:** `./manage.py check` sem erro; Postgres acessível; `ruff check .` limpo.
+
+---
+
+## E2 — Models, migrations e auth
+
+- [ ] App `core`: `Perfil`, `RoleRequiredMixin`, `AuditLog` + signal genérico
+- [ ] App `accounts`: `User` custom (`email` como username), views de login/logout,
+      CRUD de promotoras (só gestor)
+- [ ] App `prospeccao`: modelos do Backend Schema §2
+      (`Revendedora`, `Cidade`, `Telefone`, `Marca`, `ProdutoInteresse`, `RedeSocial`, `RedeSocialVinculo`)
+- [ ] Signal `m2m_changed` → recalcula `ja_revende` (RF-04)
+- [ ] `clean()` obrigatório: ≥1 telefone, ≥1 interesse, ≥1 marca se `vende_outras_marcas`
+- [ ] Validação de CPF/CEP com `django-localflavor`; CPF `unique`
+- [ ] Extensão `pg_trgm` + índices do schema §2.2
+- [ ] Migrations data: grupos, cidades seed, produtos, marcas, redes
+- [ ] Admin Django registrado (ferramenta de apoio do gestor)
+- [ ] Fixtures de teste: 2 promotoras, ~50 revendedoras distribuídas
+- [ ] Testes: regra `ja_revende`, CPF duplicado, escopo de queryset
+
+**Checkpoint E2:** `pytest` verde; `manage.py migrate` limpo em DB novo;
+criar revendedora via shell seta `ja_revende` correto nos 3 cenários
+(sem marca / com marca / marcas removidas).
+
+---
+
+## E3 — Formulário de campo (PWA)
+
+- [ ] Base template `base.html` + CSS design tokens (UI/UX Brief §2–5)
+- [ ] Componentes CSS: botão, input, chip, stepper, card, KPI card, tabela, toast
+- [ ] View `RevendedoraCreateView` com form em 4 etapas (HTMX ou form por etapa em session)
+- [ ] Máscaras JS: telefone, CPF, CEP, data (progressive enhancement; validação server-side sempre)
+- [ ] Tela de revisão (resumo + Editar por bloco) e tela de sucesso (App Flow §2)
+- [ ] `RevendedoraListView` (escopo do perfil), `DetailView`, `UpdateView`, `DeleteView` (confirmação)
+- [ ] Estados: vazio, loading, erro de validação, erro de rede com retry
+- [ ] PRG em todo POST; `?next=` no login
+- [ ] Testes de view: login obrigatório, 403 fora do escopo, create happy-path, CPF duplicado 400
+
+**Checkpoint E3:** fluxo completo no celular real:
+entrar → cadastrar → revisar → salvar → sucesso → ver na lista; dados corretos no banco.
+
+---
+
+## E4 — Dashboard
+
+- [ ] `DashboardView` variante promotora: 3 KPI cards (total, já revendem, %), últimos 10
+- [ ] Variante gestor: 4 KPI + quebra por promotora (query do Schema §4 ORM)
+- [ ] Filtro por período (dia/semana/mês) via querystring
+- [ ] Card link `Abrir análises ↗` (gestor) → URL do Streamlit
+- [ ] Lista de promotoras (CRUD, desativação) com contagem de cadastros
+- [ ] Testes: agregações com fixture conhecida (números batem 100%)
+
+**Checkpoint E4:** números do dashboard = contagem manual da fixture.
+
+---
+
+## E5 — Análises A1–A4 (Streamlit)
+
+- [ ] `analytics/` com `Home.py` (login gestor contra `auth_user` + group check)
+- [ ] `db.py`: conexão via `DATABASE_URL`, helper de filtro (CTE `base` do Schema §4)
+- [ ] `pages/1_A1_*.py` … `4_A4_*.py` com os 4 SQLs do Schema §4 + filtros
+      (período, promotora, cidade) em `st.sidebar`
+- [ ] Gráficos Plotly (barras A1/A3/A4, donut A2) + `st.dataframe` detalhe
+- [ ] Tema Streamlit com as cores do brief (`~/.streamlit/config.toml` versionado)
+- [ ] Testes: queries com fixture → A1 soma = total, A2 pct coerente, A3/A4 ordenados
+
+**Checkpoint E5:** as 4 telas abrem com login de gestor; promotora é bloqueada;
+números conferem com Django admin.
+
+---
+
+## E6 — PWA, polimento e testes
+
+- [ ] `manifest.json` + ícones (192/512/maskable/favicon) + `theme_color`
+- [ ] Service Worker: cache-first p/ estáticos, network-first p/ HTML/dados; aviso offline
+- [ ] Botão "instalar app" (beforeinstallprompt)
+- [ ] Auditoria Lighthouse: PWA ≥ 90, A11y ≥ 90, Perf ≥ 80 (3G)
+- [ ] Checklist acessibilidade do brief §8
+- [ ] LGPD: página de exclusão de dados, `AuditLog` gravando mudanças de revendedora
+- [ ] `pytest` completo + `ruff check .` verdes
+- [ ] Deploy Railway: web + Postgres, variáveis de ambiente, backup diário ativado
+- [ ] Usuário gestor seed criado, troca de senha inicial
+- [ ] README final: arquitetura, comandos, deploy
+
+**Checkpoint E6 (aceite do MVP):** AC-01 a AC-06 do PRD marcados como cumpridos.
+
+---
+
+## Riscos do plano
+
+| Risco | Impacto | Resposta |
+|---|---|---|
+| Form em 4 etapas mais lento que o esperado | Médio | E3 pode entregar form único scrollável e virar stepper depois |
+| Deploy no Railway com CSRF/HTTPS | Baixo | Testar cedo (fim da E4) |
+| Streamlit lendo DB junto com Django | Baixo | Postgres suporta; só leitura no analytics |
+| Escopo cilar em detalhes visuais | Médio | Seguir o brief ao pé da letra, sem inventar na hora |
+
+## Comandos de verificação (todo push)
+
+```bash
+ruff check .
+pytest
+./manage.py check --deploy   # prod
+```
