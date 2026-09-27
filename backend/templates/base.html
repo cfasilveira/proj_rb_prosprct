@@ -47,7 +47,7 @@
 
   <script>
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("{% static 'js/sw.js' %}");
+      navigator.serviceWorker.register("{% url 'core:sw' %}");
     }
     (function () {
       const aviso = document.getElementById("aviso-offline");

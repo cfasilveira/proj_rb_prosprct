@@ -1,13 +1,17 @@
+{% load static %}
 /* RB Prospecta - Service Worker (TRD §6)
+   Servido por `core:sw` em /sw.js — assim o escopo padrão é `/` e o worker
+   passa a controlar as navegações (AC-06). As URLs de estáticos vêm da tag
+   `static`, então batem com os nomes com hash do Manifest em produção.
    - Estáticos (CSS/JS/ícones): cache-first
    - Navegação/dados: network-first com fallback offline */
 const CACHE = "rb-prospecta-v1";
 const ESTATICOS = [
-  "/static/css/app.css",
-  "/static/js/app.js",
-  "/static/manifest.json",
-  "/static/icon-192.png",
-  "/static/icon-512.png",
+  "{% static 'css/app.css' %}",
+  "{% static 'js/app.js' %}",
+  "{% static 'manifest.json' %}",
+  "{% static 'icon-192.png' %}",
+  "{% static 'icon-512.png' %}",
 ];
 
 self.addEventListener("install", (evento) => {

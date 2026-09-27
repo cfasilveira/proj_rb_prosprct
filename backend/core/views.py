@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.utils import timezone
 
 from prospeccao.models import Revendedora
@@ -106,3 +107,14 @@ def dashboard(request: HttpRequest) -> HttpResponse:
 def privacidade(request: HttpRequest) -> HttpResponse:
     """Página de informações de dados pessoais (PRD RNF-06, LGPD)."""
     return render(request, "core/privacidade.html", {})
+
+
+def service_worker(request: HttpRequest) -> HttpResponse:
+    """Service Worker em `/sw.js` — escopo padrão `/` (AC-06, offline do shell).
+
+    Servido como rota (e não como estático) para o `register()` não cair em
+    `/static/js/…`, onde o worker só enxergaria pedidos da própria pasta.
+    """
+    return HttpResponse(
+        render_to_string("sw.js"), content_type="application/javascript; charset=utf-8"
+    )

@@ -7,16 +7,35 @@ from django.urls import reverse
 pytestmark = pytest.mark.django_db
 
 
-def test_manifest_e_service_worker_publicados():
+def test_manifest_e_icons_publicados():
     """Arquivos PWA encontrados pelo finder de estáticos (DEBUG=False nos testes)."""
     from django.contrib.staticfiles import finders
 
     assert finders.find("manifest.json")
-    assert finders.find("js/sw.js")
     assert finders.find("icon-192.png")
     assert finders.find("icon-512.png")
     assert finders.find("icon-maskable-512.png")
     assert finders.find("favicon-32.png")
+
+
+def test_service_worker_servido_na_raiz(client):
+    """`/sw.js` é rota (não estático): escopo padrão `/` para controlar navegações.
+
+    Regressão: registrado em `/static/js/sw.js` o worker só enxergava pedidos
+    da própria pasta e o shell offline (AC-06) nunca funcionava.
+    """
+    from django.templatetags.static import static
+
+    resposta = client.get(reverse("core:sw"))
+    assert resposta.status_code == 200
+    assert resposta["Content-Type"].startswith("application/javascript")
+
+    corpo = resposta.content.decode()
+    assert 'self.addEventListener("install"' in corpo
+    # mesmo resolvedor de URL da página → bate com os nomes com hash do prod
+    assert static("css/app.css") in corpo
+    assert static("js/app.js") in corpo
+    assert not corpo.lstrip().startswith("<")
 
 
 def test_base_registra_pwa_e_link_lgpd(client, django_user_model):
@@ -27,7 +46,7 @@ def test_base_registra_pwa_e_link_lgpd(client, django_user_model):
     resposta = client.get(reverse("core:dashboard"))
     conteudo = resposta.content.decode()
     assert 'rel="manifest"' in conteudo
-    assert "serviceWorker.register" in conteudo
+    assert f'navigator.serviceWorker.register("{reverse("core:sw")}")' in conteudo
     assert "btn-instalar" in conteudo
     assert "aviso-offline" in conteudo
     assert reverse("core:privacidade") in conteudo

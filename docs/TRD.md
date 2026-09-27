@@ -76,7 +76,7 @@ proj_rb_prospect/
 │   ├── accounts/              # User, Perfil, login, gestão de promotoras
 │   ├── prospeccao/            # Revendedora, marcas, produtos, redes sociais
 │   ├── templates/
-│   ├── static/                # css, js, manifest.json, sw.js, ícones
+│   ├── static/                # css, js, manifest.json, ícones
 │   └── tests/
 ├── analytics/                 # app Streamlit
 │   ├── Home.py
