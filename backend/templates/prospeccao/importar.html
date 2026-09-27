@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Importar planilha · RB Prospecta{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <h1>Importar planilha</h1>
+  <a class="btn btn-ghost-dark btn-sm" href="?modelo=1">Baixar modelo (.xlsx)</a>
+</div>
+
+<section class="card">
+  {% if not pacote %}
+  <p class="caption">
+    Envie um arquivo <strong>.xlsx</strong> com uma linha por revendedora. Nada é gravado
+    agora: na próxima etapa você vê a prévia com os erros de cada linha e só então confirma.
+  </p>
+  <form method="post" action="" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="acao" value="analisar">
+
+    {% if promotoras %}
+    <div class="field">
+      <label for="promotora_id">Importar para a promotora *</label>
+      <select id="promotora_id" name="promotora_id" required>
+        <option value="">Selecione…</option>
+        {% for p in promotoras %}
+        <option value="{{ p.pk }}" {% if promotora_atual == p.pk %}selected{% endif %}>
+          {{ p.nome_completo }} — {{ p.territorio|default:"sem território" }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+
+    <div class="field">
+      <label for="planilha">Arquivo Excel *</label>
+      <input type="file" id="planilha" name="planilha" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Analisar planilha</button>
+  </form>
+  {% else %}
+
+  <h2>Prévia da importação</h2>
+  <p class="caption">
+    Planilha com <strong>{{ total }}</strong> linha(s) ·
+    <strong>{{ validas }}</strong> pronta(s) ·
+    <strong>{{ com_erro }}</strong> com erro.
+    {% if total > max_previa %} Exibindo as primeiras {{ max_previa }}.{% endif %}
+  </p>
+
+  {% if com_erro %}
+  <p class="msg error">
+    {{ com_erro }} linha(s) têm problema e serão ignoradas. Corrija a planilha e reenvie
+    para importar tudo de uma vez.
+  </p>
+  {% endif %}
+
+  <table class="tabela">
+    <thead>
+      <tr>
+        <th>Linha</th><th>Status</th><th>Nome</th><th>Telefone</th>
+        <th>Cidade</th><th>Interesses</th><th>Já revende</th><th>Problemas</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in resultados %}
+      <tr>
+        <td>{{ r.numero }}</td>
+        <td>{% if r.ok %}<span class="badge ok">ok</span>{% else %}<span class="badge">erro</span>{% endif %}</td>
+        <td>{{ r.resumo.nome }}</td>
+        <td>{{ r.resumo.telefone }}</td>
+        <td>{{ r.resumo.cidade }}</td>
+        <td>{{ r.resumo.interesses|default:"—" }}</td>
+        <td>{% if r.resumo.ja_revende == "sim" %}<span class="badge ok">sim</span>{% else %}<span class="badge">não</span>{% endif %}</td>
+        <td class="field-error">{% if r.erros %}{{ r.erros|join:"; " }}{% else %}—{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <form method="post" action="" class="wizard-nav">
+    {% csrf_token %}
+    <input type="hidden" name="acao" value="confirmar">
+    <button type="submit" class="btn btn-primary" {% if not validas %}disabled{% endif %}>
+      Importar {{ validas }} revendedora(s)
+    </button>
+  </form>
+  <form method="post" action="">
+    {% csrf_token %}
+    <button type="submit" name="acao" value="cancelar" class="btn btn-ghost">Cancelar</button>
+  </form>
+  {% endif %}
+</section>
+
+{% endblock %}

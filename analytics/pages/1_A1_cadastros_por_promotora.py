@@ -1,10 +1,11 @@
 """A1 — Quantidade de revendedoras cadastradas por promotora."""
-import plotly.express as px
 import streamlit as st
 
 import db
+import graficos
 import queries
-from ui import kpi, protege_pagina, sidebar_filtros
+import relatorio
+from ui import botao_pdf, kpi, protege_pagina, sidebar_filtros
 
 protege_pagina()
 st.title("A1 · Cadastros por promotora")
@@ -23,16 +24,36 @@ kpi(c1, "Cadastradas", total)
 kpi(c2, "Já revendem", ja_revendem)
 kpi(c3, "Promotoras ativas", len(linhas))
 
-fig = px.bar(
-    linhas,
-    x="promotora_nome",
-    y="cadastradas",
-    text="cadastradas",
-    color="pct",
-    color_continuous_scale=["#EAF1FD", "#1B4DB1"],
-    labels={"promotora_nome": "Promotora", "cadastradas": "Cadastradas", "pct": "% já revendem"},
-)
-fig.update_layout(yaxis_title=None, xaxis_title=None, coloraxis_colorbar_title="% revende")
+fig = graficos.a1(linhas)
 st.plotly_chart(fig, use_container_width=True)
 
 st.dataframe(linhas, use_container_width=True, hide_index=True)
+
+botao_pdf(
+    "A1 · Cadastros por promotora",
+    [
+        relatorio.kpis(
+            [("Cadastradas", total), ("Já revendem", ja_revendem), ("Promotoras ativas", len(linhas))]
+        ),
+        relatorio.grafico(
+            "Cadastros por promotora",
+            fig,
+            "Cor = % da promotora que já revende. Fonte: prospeccao_revendedora.",
+        ),
+        relatorio.tabela(
+            "Detalhe por promotora",
+            ["Promotora", "Cadastradas", "Já revendem", "% já revendem"],
+            [
+                [
+                    linha["promotora_nome"],
+                    linha["cadastradas"],
+                    linha["ja_revendem"],
+                    f'{linha["pct"] or 0}%',
+                ]
+                for linha in linhas
+            ],
+        ),
+    ],
+    "a1_cadastros_por_promotora.pdf",
+    str(linhas),
+)

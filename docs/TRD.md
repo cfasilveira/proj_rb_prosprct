@@ -133,7 +133,9 @@ proj_rb_prospect/
 - CPF armazenado com criptografia em repouso? **MVP: não** — mitigar com acesso restrito + log;
   revisar em fase 2 (principal risco LGPD).
 - Log de auditoria: `AuditLog(model, obj_id, acao, user, ts)` gravado em signals.
-- Upload de arquivo: não há no MVP.
+- Upload de arquivo: não havia no MVP; na fase 2 entrou a importação de planilha Excel
+  de revendedoras (`.xlsx`, prévia com erros linha a linha antes de gravar, teto de
+  1000 linhas por envio).
 - Rate limit de login: `django-axes` (fase 2) — MVP: backoff manual simples.
 
 ## 8. Observabilidade e backup

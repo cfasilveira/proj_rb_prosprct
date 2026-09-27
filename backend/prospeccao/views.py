@@ -10,6 +10,9 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import DeleteView, DetailView, ListView
 
+from core.models import Perfil
+
+from . import importacao
 from .forms import (
     MAX_REDES,
     REVISAO,
@@ -304,3 +307,138 @@ class RevendedoraDeleteView(LoginRequiredMixin, DeleteView):
         self.object.desativar()
         messages.success(self.request, "Revendedora removida da carteira.")
         return redirect("prospeccao:revendedora_list")
+
+
+CHAVE_IMPORTACAO = "importacao_planilha"
+MAX_PREVIA = 200
+TIPO_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+def _promotoras_ativas():
+    return (
+        Perfil.objects.filter(role=Perfil.ROLE_PROMOTORA, ativo=True)
+        .select_related("user")
+        .order_by("nome_completo")
+    )
+
+
+class ImportarExcelView(LoginRequiredMixin, View):
+    """Planilha Excel -> prévia com erros linha a linha -> grava em lote.
+
+    Nada é gravado na análise: a prévia só mostra o que aconteceria, e a
+    confirmação revalida e chama `criar_revendedora` linha a linha.
+    """
+
+    template = "prospeccao/importar.html"
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if request.GET.get("modelo"):
+            resposta = HttpResponse(importacao.modelo(), content_type=TIPO_XLSX)
+            resposta["Content-Disposition"] = 'attachment; filename="modelo_revendedoras.xlsx"'
+            return resposta
+        return self._render(request)
+
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        acao = request.POST.get("acao", "")
+
+        if acao == "cancelar":
+            request.session.pop(CHAVE_IMPORTACAO, None)
+            messages.info(request, "Importação cancelada.")
+            return redirect("prospeccao:importar")
+
+        if acao == "confirmar":
+            return self._confirma(request)
+
+        if acao == "analisar":
+            return self._analisar(request)
+
+        return self._render(request)
+
+    def _promotora_alvo(self, request: HttpRequest):
+        """Promotora que vai receber os cadastros (gestor escolhe; promotoras, elas mesmas)."""
+        if not request.user.perfil.is_gestor:
+            return request.user
+        escolhida = request.POST.get("promotora_id")
+        if not escolhida:
+            return None
+        perfil = (
+            _promotoras_ativas().filter(pk=escolhida).first()
+        )
+        return perfil.user if perfil else None
+
+    def _analisar(self, request: HttpRequest) -> HttpResponse:
+        arquivo = request.FILES.get("planilha")
+        promotora = self._promotora_alvo(request)
+
+        if not arquivo:
+            messages.error(request, "Escolha um arquivo .xlsx para importar.")
+            return self._render(request, request.POST.get("promotora_id"))
+        if promotora is None:
+            messages.error(request, "Escolha a promotora que vai receber os cadastros.")
+            return self._render(request, request.POST.get("promotora_id"))
+
+        try:
+            linhas = importacao.ler_planilha(arquivo)
+        except importacao.ErroDePlanilha as erro:
+            messages.error(request, str(erro))
+            return self._render(request, promotora.pk)
+
+        request.session[CHAVE_IMPORTACAO] = {"linhas": linhas, "promotora_id": promotora.pk}
+        return self._render(request, promotora.pk)
+
+    def _confirma(self, request: HttpRequest) -> HttpResponse:
+        pacote = request.session.get(CHAVE_IMPORTACAO)
+        if not pacote:
+            messages.error(request, "Envie uma planilha primeiro.")
+            return redirect("prospeccao:importar")
+
+        perfil = Perfil.objects.select_related("user").filter(pk=pacote["promotora_id"]).first()
+        if perfil is None or not perfil.ativo:
+            messages.error(request, "A promotora escolhida não está mais disponível.")
+            request.session.pop(CHAVE_IMPORTACAO, None)
+            return redirect("prospeccao:importar")
+        if not request.user.perfil.is_gestor and perfil.user_id != request.user.pk:
+            messages.error(request, "Você só pode importar para a própria carteira.")
+            request.session.pop(CHAVE_IMPORTACAO, None)
+            return redirect("prospeccao:importar")
+
+        resultados = importacao.analisa(pacote["linhas"])
+        resumo = importacao.importa(resultados, perfil.user)
+
+        for falha in resumo["falhas"]:
+            messages.error(request, falha)
+
+        if not resumo["criadas"]:
+            messages.error(
+                request,
+                "Nenhuma linha pôde ser importada. Corrija a planilha e envie de novo.",
+            )
+            return self._render(request, perfil.pk)
+
+        request.session.pop(CHAVE_IMPORTACAO, None)
+        aviso = f"{resumo['criadas']} revendedora(s) importada(s) para {perfil.nome_completo}."
+        if resumo["puladas"]:
+            aviso += f" {resumo['puladas']} linha(s) com erro foram ignoradas."
+        messages.success(request, aviso)
+        return redirect("prospeccao:importar")
+
+    def _render(self, request: HttpRequest, promotora_selecionada=None) -> HttpResponse:
+        pacote = request.session.get(CHAVE_IMPORTACAO)
+        resultados = importacao.analisa(pacote["linhas"]) if pacote else []
+        validas = sum(1 for linha in resultados if linha.ok)
+        gestor = request.user.perfil.is_gestor
+        try:
+            selecionada = int(promotora_selecionada) if promotora_selecionada else None
+        except (TypeError, ValueError):
+            selecionada = None
+        contexto = {
+            "pacote": pacote,
+            "resultados": resultados[:MAX_PREVIA],
+            "total": len(resultados),
+            "validas": validas,
+            "com_erro": len(resultados) - validas,
+            "promotoras": _promotoras_ativas() if gestor else [],
+            "promotora_atual": selecionada or (pacote or {}).get("promotora_id"),
+            "max_previa": MAX_PREVIA,
+        }
+        return render(request, self.template, contexto)

@@ -8,6 +8,8 @@ from django.utils import timezone
 
 from prospeccao.models import Revendedora
 
+from . import relatorios
+
 PERIODOS = {
     "dia": "Hoje",
     "semana": "7 dias",
@@ -83,6 +85,21 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         "periodos": PERIODOS,
         "ano_atual": datetime.now().year,
     }
+
+    if request.GET.get("exportar") == "pdf":
+        conteudo = relatorios.pdf_dashboard(
+            perfil=perfil,
+            periodo_nome=PERIODOS[periodo],
+            total=total,
+            ja_revendem=ja_revendem,
+            pct=pct,
+            ultimos=list(ultimos),
+            por_promotora=por_promotora,
+        )
+        resposta = HttpResponse(conteudo, content_type="application/pdf")
+        resposta["Content-Disposition"] = f'attachment; filename="dashboard_{periodo}.pdf"'
+        return resposta
+
     return render(request, "core/dashboard.html", contexto)
 
 

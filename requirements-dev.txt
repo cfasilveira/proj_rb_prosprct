@@ -5,3 +5,5 @@ ruff>=0.6
 streamlit>=1.40
 plotly>=5.20
 pandas>=2.2
+# exportação em PDF das análises (rasteriza as figuras Plotly; usa o Chrome do SO)
+kaleido>=1.0

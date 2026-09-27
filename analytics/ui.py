@@ -5,6 +5,7 @@ import streamlit as st
 
 import db
 import queries
+import relatorio
 
 PERIODOS = {"Sempre": None, "Hoje": 1, "7 dias": 7, "30 dias": 30}
 
@@ -34,8 +35,35 @@ def sidebar_filtros() -> dict:
         (c["id"] for c in cidades if c["nome"] == escolha_cidade), None
     ) if escolha_cidade != "Todas" else None
 
-    st.sidebar.caption(f"Período: {periodo.lower()} · {escolha} · {escolha_cidade}")
+    rotulo = f"Período: {periodo.lower()} · {escolha} · {escolha_cidade}"
+    st.session_state["rotulo_filtros"] = rotulo
+    st.sidebar.caption(rotulo)
     return queries.params(de=de, ate=ate, promotora_id=promotora_id, cidade_id=cidade_id)
+
+
+def botao_pdf(titulo: str, blocos: list[dict], arquivo: str, assinatura: str):
+    """Botão de download do PDF desta página (PRD fase 2 — exportação).
+
+    O PDF só é regenerado quando os dados mudam: kaleido + reportlab custam
+    ~2s e não vale a pena a cada rerun do Streamlit.
+    """
+    subtitulo = st.session_state.get("rotulo_filtros", "Período: sempre · Todas · Todas")
+    memo = st.session_state.setdefault("pdf_memo", {})
+    chave = (titulo, subtitulo, assinatura)
+    try:
+        if memo.get("chave") != chave:
+            memo["bytes"] = relatorio.gerar_pdf(titulo, subtitulo, blocos)
+            memo["chave"] = chave
+    except Exception as erro:  # kaleido/reportlab podem faltar no ambiente
+        st.error(f"Não foi possível gerar o PDF: {erro}")
+        return
+    st.download_button(
+        "📄 Baixar PDF desta análise",
+        data=memo["bytes"],
+        file_name=arquivo,
+        mime="application/pdf",
+        use_container_width=True,
+    )
 
 
 def kpi(coluna, rotulo: str, valor, destaque: bool = False):

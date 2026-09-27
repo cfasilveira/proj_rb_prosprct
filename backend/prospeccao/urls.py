@@ -5,6 +5,7 @@ from . import views
 app_name = "prospeccao"
 
 urlpatterns = [
+    path("importar/", views.ImportarExcelView.as_view(), name="importar"),
     path("revendedoras/", views.RevendedoraListView.as_view(), name="revendedora_list"),
     path("revendedoras/nova/", views.RevendedoraWizardView.as_view(), name="revendedora_nova"),
     path("revendedoras/<int:pk>/", views.RevendedoraDetailView.as_view(), name="revendedora_detail"),

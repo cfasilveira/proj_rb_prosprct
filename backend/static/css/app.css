@@ -252,6 +252,7 @@ label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
 .kpi-num { margin: 6px 0 0; font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--azul); }
 .kpi-acao .btn { display: block; width: 100%; margin-top: 8px; }
 .filtros-periodo { display: flex; gap: 8px; flex-wrap: wrap; }
+.page-head-acoes { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .filtros-periodo .chip { text-decoration: none; }
 
 /* ---------- PWA / estados (E6) ---------- */

@@ -2,6 +2,7 @@
 import streamlit as st
 
 import db
+import relatorio
 
 st.set_page_config(
     page_title="RB Prospecta · Análises",
@@ -38,6 +39,27 @@ st.page_link("pages/3_A3_marcas.py",
              label="A3 · Marcas revendidas", icon="3️⃣")
 st.page_link("pages/4_A4_interesse_produtos.py",
              label="A4 · Interesse em produtos", icon="4️⃣")
+
+st.divider()
+st.subheader("Relatório completo")
+st.caption(
+    "Sobe A1–A4 em um único PDF, com os filtros padrão "
+    "(período completo, todas as promotoras e cidades)."
+)
+if st.button("Gerar PDF com A1–A4", use_container_width=True):
+    with st.spinner("Montando o PDF (leva alguns segundos)…"):
+        try:
+            st.session_state["relatorio_completo"] = relatorio.completo()
+        except Exception as erro:
+            st.error(f"Não foi possível gerar o PDF: {erro}")
+if st.session_state.get("relatorio_completo"):
+    st.download_button(
+        "📄 Baixar relatório completo (PDF)",
+        data=st.session_state["relatorio_completo"],
+        file_name="relatorio_completo_a1_a4.pdf",
+        mime="application/pdf",
+        use_container_width=True,
+    )
 
 with st.sidebar:
     if st.button("Sair"):
