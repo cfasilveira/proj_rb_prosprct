@@ -1,7 +1,9 @@
 """Testes de E5: queries das análises A1–A4 (PRD RF-06, AC-04)."""
+import re
 from datetime import timedelta
 
 import analytics.db as db
+import analytics.graficos as graficos
 import analytics.queries as queries
 import pytest
 from django.utils import timezone
@@ -188,3 +190,20 @@ def test_autenticacao_de_gestor():
     from django.contrib.auth import get_user_model
 
     assert get_user_model()._meta.db_table == "accounts_user"
+
+
+def test_graficos_a_partir_das_queries_reais(carteira):
+    """Query real → figura Plotly, sem erro de tipo (regressão A3/A4)."""
+    a1 = graficos.a1(db.executar(queries.SQL_A1, queries.params()))
+    a2 = graficos.a2(db.executar(queries.SQL_A2, queries.params())[0])
+    a3 = graficos.a3(db.executar(queries.SQL_A3, queries.params()))
+    a4 = graficos.a4(db.executar(queries.SQL_A4, queries.params()))
+
+    assert len(a1.data) == 1 and a1.layout.yaxis.title.text is None
+    assert a2.data[0].values == (3, 1)
+    assert len(a3.data) == 1 and a3.layout.yaxis.title.text is None
+    assert len(a4.data) == 1
+    assert a4.layout.xaxis.title.text is None and a4.layout.yaxis.title.text is None
+    for fig in (a1, a3, a4):
+        hover = fig.data[0].hovertemplate
+        assert hover and not re.search(r"(?:^|<br>)=", hover)
