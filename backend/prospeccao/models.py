@@ -11,6 +11,8 @@ from django.db import models
 from django.utils import timezone
 from localflavor.br.br_states import STATE_CHOICES
 
+from core.models import AuditLog
+
 apenas_digitos = RegexValidator(r"^\d+$", "Use apenas dígitos.")
 valida_cpf = RegexValidator(r"^\d{11}$", "CPF deve ter 11 dígitos (sem pontos/hífen).")
 valida_cep = RegexValidator(r"^\d{8}$", "CEP deve ter 8 dígitos (sem hífen).")
@@ -87,6 +89,8 @@ class RedeSocial(models.Model):
 class Revendedora(models.Model):
     """Entidade central: revendedora cadastrada em campo (schema §2.2)."""
 
+    NOME_EXCLUIDA = "Revendedora excluída"
+
     promotora = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.RESTRICT,
@@ -159,6 +163,61 @@ class Revendedora(models.Model):
         """Exclusão lógica (RF-03, schema §2.5)."""
         self.desativado_em = timezone.now()
         self.save(update_fields=["desativado_em", "atualizado_em"])
+
+    @property
+    def anonimizada(self) -> bool:
+        """True quando os dados pessoais já foram apagados (RNF-06/LGPD)."""
+        return self.nome_completo == self.NOME_EXCLUIDA and self.cpf is None
+
+    def excluir_dados_pessoais(self, usuario=None):
+        """Anonimização LGPD: apaga os dados pessoais, mantém a linha e a auditoria.
+
+        A revendedora deixa de ser identificável (RNF-06), mas a estrutura e o
+        vínculo com a promotora permanecem — as consultas já a ignoram por
+        ``desativado_em``. Idempotente: uma segunda chamada não repete a ação.
+        """
+        if self.anonimizada:
+            return self
+        self.nome_completo = self.NOME_EXCLUIDA
+        self.cpf = None
+        self.rg = ""
+        self.email = ""
+        self.data_nascimento = None
+        self.endereco = ""
+        self.bairro = ""
+        self.cep = ""
+        self.observacao = ""
+        if self.desativado_em is None:
+            self.desativado_em = timezone.now()
+        self.save(
+            update_fields=[
+                "nome_completo",
+                "cpf",
+                "rg",
+                "email",
+                "data_nascimento",
+                "endereco",
+                "bairro",
+                "cep",
+                "observacao",
+                "desativado_em",
+                "atualizado_em",
+            ]
+        )
+        self.telefones.all().delete()
+        self.redes.all().delete()
+        # auditoria mínima: esvazia as entradas antigas (traziam o nome) e registra a ação
+        AuditLog.objects.filter(model="Revendedora", obj_id=self.pk).update(
+            payload={"anonimizado": True}
+        )
+        AuditLog.objects.create(
+            user=usuario,
+            model="Revendedora",
+            obj_id=self.pk,
+            acao="delete",
+            payload={"motivo": "lgpd", "anonimizado": True},
+        )
+        return self
 
     @property
     def ativa(self) -> bool:

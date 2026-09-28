@@ -35,6 +35,23 @@ class RevendedoraAdmin(admin.ModelAdmin):
     search_fields = ["nome_completo", "cpf", "email"]
     inlines = [TelefoneInline, RevendedoraMarcaInline, RevendedoraInteresseInline]
     readonly_fields = ["ja_revende", "criado_em", "atualizado_em"]
+    actions = ["excluir_dados_pessoais"]
+
+    @admin.action(description="Excluir dados pessoais (LGPD RNF-06)")
+    def excluir_dados_pessoais(self, request, queryset):
+        """Anonimiza em lote; registros já anonimizados são ignorados."""
+        a_excluir = [revendedora for revendedora in queryset if not revendedora.anonimizada]
+        for revendedora in a_excluir:
+            revendedora.excluir_dados_pessoais(usuario=request.user)
+
+        if a_excluir:
+            self.message_user(request, f"{len(a_excluir)} revendedora(s) anonimizada(s).")
+        else:
+            self.message_user(
+                request,
+                "Nada a fazer: os registros selecionados já estavam anonimizados.",
+                level="warning",
+            )
 
 
 @admin.register(Marca)

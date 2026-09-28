@@ -83,6 +83,24 @@ docs/        # documentação do produto
    `requirements-analytics` do `analytics/requirements.txt`.
 6. Após o deploy: `python backend/manage.py criar_gestor ...`
 
+## LGPD — exclusão de dados pessoais (RNF-06)
+
+A página `/privacidade/` promete exclusão sob demanda. Dois caminhos, ambos
+auditados:
+
+```bash
+# comando (identifica por CPF ou e-mail; --usuario grava quem fez)
+.venv/bin/python backend/manage.py excluir_dados --cpf 12345678901 \
+    --usuario gestor@suaempresa.com
+```
+
+- admin → `Revendedora` → ação **“Excluir dados pessoais (LGPD RNF-06)”**.
+
+Em ambos a revendedora é anonimizada no lugar (nome, CPF, RG, e-mail,
+nascimento, endereço e observação apagados; telefones e redes removidos), a
+linha permanece como registro sem identificação e a auditoria guarda apenas
+quem fez, quando e qual ação.
+
 ## Checklist de aceite do MVP (PRD §7)
 
 - [ ] AC-01 — cadastro completo em ≤ 2 min no celular

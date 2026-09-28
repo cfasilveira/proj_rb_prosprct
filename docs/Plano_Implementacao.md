@@ -154,6 +154,36 @@ importação com erros linha a linha; PDFs abrem com gráfico e tabelas.
 
 ---
 
+## F3 · Correções de produção (priorizadas após avaliação)
+
+Ordem acordada com o cliente: 1) commit + SECRET_KEY/migrate, 2) escopo do
+Service Worker, 3) LGPD, 4) CI, 5) saúde/rate limit, 6) deploy + Lighthouse,
+7) Playwright/CPF/CSV.
+
+### F3.1 · Escopo do Service Worker (AC-06)
+
+- [x] `sw.js` sai de `static/js/` e vira template servido pela rota `core:sw`
+  (`/sw.js`) → escopo padrão `/` e o worker passa a controlar navegações
+- [x] precache usa a tag `static`, batendo com os nomes com hash do
+  `ManifestStorage` em produção
+- [x] testes da rota, do conteúdo e do `register()` no HTML
+
+### F3.2 · LGPD / RNF-06 — exclusão real de dados pessoais
+
+- [x] `Revendedora.excluir_dados_pessoais()`: anonimização no lugar
+  (nome/CPF/RG/e-mail/nascimento/endereço/observação apagados, telefones e
+  redes removidos), linha e vínculo com a promotora preservados
+- [x] auditoria mínima: entrada própria `{"motivo": "lgpd"}` e apuração das
+  entradas antigas que guardavam o nome; `post_delete` deixa de gravar nome
+- [x] `manage.py excluir_dados --cpf/--email [--usuario]`
+- [x] ação do admin “Excluir dados pessoais (LGPD RNF-06)”, com aviso de
+  registros já anonimizados
+- [x] testes `backend/tests/test_lgpd.py` (model, comando, admin, delete duro)
+
+**Checkpoint F3.1+F3.2:** `ruff check . && pytest` verdes (125 testes).
+
+---
+
 ## Riscos do plano
 
 | Risco | Impacto | Resposta |

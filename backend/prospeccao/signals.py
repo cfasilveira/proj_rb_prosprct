@@ -40,10 +40,11 @@ def audita_criacao_edicao(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=Revendedora)
 def audita_exclusao(sender, instance, **kwargs):
+    """Auditoria mínima: sem dado pessoal (RNF-06/LGPD)."""
     AuditLog.objects.create(
         user=usuario_atual(),
         model="Revendedora",
         obj_id=instance.pk,
         acao="delete",
-        payload={"nome": instance.nome_completo},
+        payload={},
     )
