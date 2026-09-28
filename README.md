@@ -53,8 +53,22 @@ cp .env.example .env
 
 ```bash
 .venv/bin/ruff check .
-.venv/bin/pytest          # 55 testes
+.venv/bin/pytest          # 145 testes
 ```
+
+## Exportação de relatórios (CSV e PDF)
+
+| Onde | CSV | PDF |
+|---|---|---|
+| Dashboard (`?exportar=csv`) | detalhe de todas as revendedoras do escopo/período | resumo com KPIs, por promotora e últimos cadastros |
+| Análises A1–A4 (Streamlit) | a mesma tabela exibida na tela | gráfico + tabela |
+
+O CSV usa separador `;` e UTF-8 com BOM: dois cliques e o Excel em português
+abre com colunas e acentos certos.
+
+> **LGPD:** o CSV do dashboard leva todos os campos da revendedora, incluindo
+> CPF, RG, e-mail e data de nascimento — é um arquivo de uso interno do gestor
+> e deve ser tratado como dado pessoal. Nos PDFs esses campos não aparecem.
 
 ## Estrutura
 

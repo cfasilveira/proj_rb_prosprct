@@ -66,6 +66,21 @@ def botao_pdf(titulo: str, blocos: list[dict], arquivo: str, assinatura: str):
     )
 
 
+def botao_csv(linhas: list[dict], arquivo: str, colunas: list[str] | None = None):
+    """Botão de download do CSV desta página (PRD fase 2 — exportação).
+
+    Barato de gerar, então sai a cada rerun: sem cache nem risco de servir
+    dados velhos depois de mudar um filtro.
+    """
+    st.download_button(
+        "⬇️ Baixar CSV desta análise",
+        data=relatorio.gerar_csv(linhas, colunas),
+        file_name=arquivo,
+        mime="text/csv",
+        use_container_width=True,
+    )
+
+
 def kpi(coluna, rotulo: str, valor, destaque: bool = False):
     rotulo_html = f"<p style='margin:0;font-size:0.85rem;color:#5F6368'>{rotulo}</p>"
     cor = "#1B4DB1" if destaque else "#1A1A1A"

@@ -5,7 +5,7 @@ import db
 import graficos
 import queries
 import relatorio
-from ui import botao_pdf, kpi, protege_pagina, sidebar_filtros
+from ui import botao_csv, botao_pdf, kpi, protege_pagina, sidebar_filtros
 
 protege_pagina()
 st.title("A1 · Cadastros por promotora")
@@ -28,6 +28,8 @@ fig = graficos.a1(linhas)
 st.plotly_chart(fig, use_container_width=True)
 
 st.dataframe(linhas, use_container_width=True, hide_index=True)
+
+botao_csv(linhas, "a1_cadastros_por_promotora.csv")
 
 botao_pdf(
     "A1 · Cadastros por promotora",

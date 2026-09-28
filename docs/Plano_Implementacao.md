@@ -4,11 +4,12 @@
 **Depende de:** PRD, TRD, App Flow, UI/UX Brief, Backend Schema
 **Stack:** Django 5 + Postgres 16 + Streamlit · **Estimativa:** 6 etapas, ~2 semanas
 
-> **Status (27/09/2026): E1–E6 + Fase 2 CONCLUÍDAS.** 113 testes (`pytest`), `ruff` limpo.
+> **Status (28/09/2026): E1–E6 + Fase 2 CONCLUÍDAS.** 145 testes (`pytest`), `ruff` limpo.
 > Pendências operacionais de produção: deploy Railway, auditoria Lighthouse em produção
 > e validação AC-06 (instalação PWA) em dispositivo real — ver README.
-> Fase 2: importação de planilha Excel de revendedoras (PWA) e exportação em PDF
-> (dashboard Django + análises A1–A4). Ficou de fora: exportação CSV (PRD §4.2).
+> Fase 2: importação de planilha Excel de revendedoras (PWA), exportação em PDF
+> (dashboard Django + análises A1–A4) e exportação em CSV (detalhe no dashboard,
+> tabelas A1–A4 no Streamlit).
 
 ## Visão geral
 
@@ -20,7 +21,7 @@
 | E4 | Dashboard (promotora e gestor) | E3 | 1 dia | ✅ concluída |
 | E5 | Análises A1–A4 (Streamlit) | E2 | 1 dia | ✅ concluída |
 | E6 | PWA, polimento e testes | E3–E5 | 1,5 dia | ✅ concluída |
-| F2 | Importação Excel + exportação PDF | E4–E6 | 1,5 dia | ✅ concluída |
+| F2 | Importação Excel + exportação PDF/CSV | E4–E6 | 1,5 dia | ✅ concluída |
 
 **Definição de pronto (todas as etapas):** `ruff check . && pytest` verdes +
 aceite visual manual no celular (360px).
@@ -149,8 +150,23 @@ números conferem com Django admin.
 - [x] Requisitos: `openpyxl`/`reportlab` em `requirements.txt`, `kaleido` em
   `requirements-dev.txt` e `analytics/requirements.txt` (usa o Chrome do sistema)
 
-**Checkpoint Fase 2:** `ruff check . && pytest` verdes (113 testes); prévia de
-importação com erros linha a linha; PDFs abrem com gráfico e tabelas.
+### F2.3 · Exportação CSV
+
+- [x] Dashboard Django: `core/exportacao.py` + `?exportar=csv` — detalhe de
+  **todas** as revendedoras do escopo/período (18 colunas: identificação,
+  contato, território, marcas, interesses e data), separador `;` e UTF-8 com
+  BOM para o Excel em português abrir no duplo clique
+- [x] botão **“Exportar CSV”** ao lado do “Exportar PDF” no dashboard
+- [x] Análises A1–A4: `relatorio.gerar_csv()` + `ui.botao_csv()` — exporta a
+  mesma tabela exibida na tela (A2 leva a quebra por cidade, A4 sai sem a
+  coluna auxiliar `ordem`)
+- [x] testes: `backend/tests/test_exportacao_csv.py` (escopo por perfil,
+  período, carteira vazia, acentos, revendedora anonimizada fora, N+1) +
+  gerador e botões no Streamlit
+
+**Checkpoint Fase 2:** `ruff check . && pytest` verdes (145 testes); prévia de
+importação com erros linha a linha; PDFs abrem com gráfico e tabelas; CSVs
+abrem no Excel com colunas e acentos corretos.
 
 ---
 

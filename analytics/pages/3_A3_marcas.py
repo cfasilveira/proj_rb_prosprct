@@ -5,7 +5,7 @@ import db
 import graficos
 import queries
 import relatorio
-from ui import botao_pdf, protege_pagina, sidebar_filtros
+from ui import botao_csv, botao_pdf, protege_pagina, sidebar_filtros
 
 protege_pagina()
 st.title("A3 · Marcas já revendidas")
@@ -22,6 +22,8 @@ st.caption(f"{len(linhas)} marca(s) distinta(s) na carteira filtrada.")
 fig = graficos.a3(linhas)
 st.plotly_chart(fig, use_container_width=True)
 st.dataframe(linhas, use_container_width=True, hide_index=True)
+
+botao_csv(linhas, "a3_marcas_revendidas.csv")
 
 botao_pdf(
     "A3 · Marcas já revendidas",

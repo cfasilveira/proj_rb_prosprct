@@ -10,7 +10,7 @@ from django.utils import timezone
 
 from prospeccao.models import Revendedora
 
-from . import relatorios
+from . import exportacao, relatorios
 
 PERIODOS = {
     "dia": "Hoje",
@@ -44,6 +44,13 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     desde = _desde(periodo)
     if desde:
         queryset = queryset.filter(criado_em__gte=desde)
+
+    if request.GET.get("exportar") == "csv":
+        resposta = HttpResponse(
+            exportacao.csv_revendedoras(queryset), content_type="text/csv; charset=utf-8"
+        )
+        resposta["Content-Disposition"] = f'attachment; filename="revendedoras_{periodo}.csv"'
+        return resposta
 
     total = queryset.count()
     ja_revendem = queryset.filter(ja_revende=True).count()

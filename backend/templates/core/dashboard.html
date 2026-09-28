@@ -10,6 +10,7 @@
         <a href="?periodo={{ chave }}" class="chip {% if periodo == chave %}on{% endif %}">{{ nome }}</a>
       {% endfor %}
     </nav>
+    <a class="btn btn-ghost-dark btn-sm" href="?periodo={{ periodo }}&exportar=csv">Exportar CSV</a>
     <a class="btn btn-ghost-dark btn-sm" href="?periodo={{ periodo }}&exportar=pdf">Exportar PDF</a>
   </span>
 </div>

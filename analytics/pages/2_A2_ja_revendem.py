@@ -5,7 +5,7 @@ import db
 import graficos
 import queries
 import relatorio
-from ui import botao_pdf, kpi, protege_pagina, sidebar_filtros
+from ui import botao_csv, botao_pdf, kpi, protege_pagina, sidebar_filtros
 
 protege_pagina()
 st.title("A2 · Quantas já revendem")
@@ -55,6 +55,9 @@ if por_cidade:
             ],
         )
     )
+
+if por_cidade:
+    botao_csv(por_cidade, "a2_ja_revendem_por_cidade.csv")
 
 botao_pdf("A2 · Quantas já revendem", blocos, "a2_ja_revendem.pdf",
           str(linha) + str(por_cidade))

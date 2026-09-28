@@ -1,13 +1,16 @@
-"""Exportação em PDF das análises (PRD fase 2 — fase 2: exportação de relatórios).
+"""Exportação das análises em PDF e CSV (PRD fase 2 — exportação de relatórios).
 
 `gerar_pdf` é puro (sem Streamlit): recebe os blocos da página, usa kaleido
 para rasterizar as figuras Plotly e reportlab para compor a página A4 na
-horizontal. O botão de download fica em `ui.botao_pdf`.
+horizontal. `gerar_csv` leva a mesma tabela exibida na tela, no formato que o
+Excel em português abre no duplo clique (`;` + UTF-8 com BOM). Os botões de
+download ficam em `ui.botao_pdf` e `ui.botao_csv`.
 """
 from __future__ import annotations
 
+import csv
 from datetime import datetime
-from io import BytesIO
+from io import BytesIO, StringIO
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
@@ -158,6 +161,26 @@ def gerar_pdf(titulo: str, subtitulo: str, blocos: list[dict]) -> bytes:
     )
     documento.build(elementos)
     return buffer.getvalue()
+
+
+SEPARADOR = ";"
+BOM = "\ufeff"
+
+
+def gerar_csv(linhas: list[dict], colunas: list[str] | None = None) -> bytes:
+    """Tabela da análise em CSV: separador `;`, BOM e UTF-8 para o Excel pt-BR.
+
+    `linhas` é o mesmo `list[dict]` entregue por `db.executar` (ou a projeção
+    que a página exibe); `colunas` opcional fixa a ordem do cabeçalho. `None`
+    vira célula vazia — é o que o `csv.writer` já faz.
+    """
+    colunas = colunas or (list(linhas[0]) if linhas else [])
+    buffer = StringIO()
+    escritor = csv.writer(buffer, delimiter=SEPARADOR, lineterminator="\r\n")
+    escritor.writerow(colunas)
+    for linha in linhas:
+        escritor.writerow([linha.get(coluna) for coluna in colunas])
+    return (BOM + buffer.getvalue()).encode("utf-8")
 
 
 def completo(

@@ -100,13 +100,15 @@ def test_a4_lista_as_categorias_sem_a_coluna_de_ordem():
 
 
 @pytest.mark.parametrize("pagina", PAGINAS)
-def test_pagina_oferece_download_do_pdf(pagina):
-    """Cada análise precisa do botão de exportação em PDF (PRD fase 2)."""
+def test_pagina_oferece_exportacao_csv_e_pdf(pagina):
+    """Cada análise precisa de CSV (dados) e PDF (relatório) — PRD fase 2."""
     at = _executa(pagina)
     assert [str(exc.value) for exc in at.exception] == []
     botoes = at.get("download_button")
-    assert len(botoes) == 1
-    assert botoes[0].label == "📄 Baixar PDF desta análise"
+    assert [botao.label for botao in botoes] == [
+        "⬇️ Baixar CSV desta análise",
+        "📄 Baixar PDF desta análise",
+    ]
 
 
 def test_home_gera_o_relatorio_completo_a1_a4():

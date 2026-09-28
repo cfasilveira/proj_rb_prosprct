@@ -5,7 +5,7 @@ import db
 import graficos
 import queries
 import relatorio
-from ui import botao_pdf, protege_pagina, sidebar_filtros
+from ui import botao_csv, botao_pdf, protege_pagina, sidebar_filtros
 
 protege_pagina()
 st.title("A4 · Interesse em produtos")
@@ -23,6 +23,8 @@ st.plotly_chart(fig, use_container_width=True)
 # db.executar devolve list[dict] (não DataFrame): projeta sem a ordem do seed.
 tabela = [{chave: valor for chave, valor in linha.items() if chave != "ordem"} for linha in linhas]
 st.dataframe(tabela, use_container_width=True, hide_index=True)
+
+botao_csv(tabela, "a4_interesse_produtos.csv")
 
 botao_pdf(
     "A4 · Interesse em produtos",

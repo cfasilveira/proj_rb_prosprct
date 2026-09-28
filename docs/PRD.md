@@ -62,7 +62,7 @@ análises de volume, perfil e interesse.
 
 - Cadastro offline com sincronização posterior.
 - Integração com WhatsApp/envio automático de mensagens.
-- Exportação CSV/PDF dos relatórios (fase 2).
+- Exportação CSV/PDF dos relatórios (fora do MVP; entregue na fase 2).
 - Multi-tenant (várias redes) — produto é single-tenant.
 - Geolocalização/CEP automático.
 - App nativo Android/iOS.

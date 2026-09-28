@@ -1,5 +1,6 @@
 """Testes da exportação em PDF (PRD fase 2 — fase 2: exportação de relatórios)."""
 import base64
+import codecs
 import re
 import unicodedata
 import zlib
@@ -132,6 +133,26 @@ def test_pdf_das_analises_com_grafico_plotly():
     texto = _texto_do_pdf(pdf)
     assert "Cadastros por promotora" in texto
     assert "Ana Souza" in texto
+
+
+def test_gerar_csv_das_analises():
+    """CSV das análises: `;`, BOM e None como célula vazia (PRD fase 2)."""
+    bytes_csv = relatorio.gerar_csv(
+        [
+            {"promotora_nome": "Ana", "cadastradas": 17, "pct": 58.8},
+            {"promotora_nome": "Bia;Zika", "cadastradas": 16, "pct": None},
+        ]
+    )
+    assert bytes_csv.startswith(codecs.BOM_UTF8)
+    linhas = bytes_csv.decode("utf-8-sig").splitlines()
+    assert linhas[0] == "promotora_nome;cadastradas;pct"
+    assert linhas[1] == "Ana;17;58.8"
+    assert linhas[2] == '"Bia;Zika";16;'
+
+
+def test_gerar_csv_com_colunas_na_ordem_escolhida():
+    bytes_csv = relatorio.gerar_csv([{"b": 1, "a": 2}], ["a", "b"])
+    assert bytes_csv.decode("utf-8-sig").splitlines() == ["a;b", "2;1"]
 
 
 def _configura_url_do_analytics(monkeypatch, settings):
