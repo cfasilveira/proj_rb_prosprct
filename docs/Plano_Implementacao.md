@@ -219,6 +219,25 @@ Service Worker, 3) LGPD, 4) CI, 5) saúde/rate limit, 6) deploy + Lighthouse,
   sample (default `0`)
 - [x] testes `backend/tests/test_sentry.py` (com e sem DSN)
 
+### F3.7 · Lighthouse / AC-06 (medição local)
+
+Ferramenta: **Lighthouse 11.7.1** — a v12+ **removeu a categoria `pwa`**, então
+o aceite precisa deversão pinada (ou medição manual do install/offline).
+
+| Página | PWA | A11y | Perf | BP | SEO |
+|---|---|---|---|---|---|
+| `/contas/entrar/` | 100 | 100 | 100 | 100 | 100 |
+| `/` (dashboard, autenticado) | 100 | 100 | 100 | 100 | 100 |
+| `/revendedoras/nova/` (wizard) | 100 | 100 | 100 | 100 | 98 |
+
+- [x] Instalação confirmada (`installable-manifest` e `maskable-icon` PASS:
+  manifest + service worker atendem os requisitos de instalabilidade)
+- [x] Contraste apontado pela medição corrigido: novo token `--verde-700`
+  (#0B6B44) para **texto** — `.badge.ok` estava 3.78:1 (mínimo 4.5); aplicado
+  também em `.step.done` e no `.step-dot` (texto branco sobre verde)
+- pendente: repetir em produção (HTTPS, assets com hash/compressão) antes de
+  marcar o AC-06/Lighthouse no checklist do README
+
 ---
 
 ## Riscos do plano

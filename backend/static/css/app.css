@@ -4,6 +4,7 @@
   --azul-800: #12357A;
   --azul-50: #EAF1FD;
   --verde: #128C5A;
+  --verde-700: #0B6B44; /* verde do texto: ≥4.5:1 sobre fundo claro (a11y) */
   --ambar: #C77700;
   --erro: #C62828;
   --grafite: #1A1A1A;
@@ -106,8 +107,8 @@ label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
 }
 .step.current { color: var(--azul); font-weight: 600; }
 .step.current .step-dot { background: var(--azul); border-color: var(--azul); color: #fff; }
-.step.done { color: var(--verde); }
-.step.done .step-dot { background: var(--verde); border-color: var(--verde); color: #fff; }
+.step.done { color: var(--verde-700); }
+.step.done .step-dot { background: var(--verde-700); border-color: var(--verde); color: #fff; }
 
 /* ---------- Campos ---------- */
 .field { margin-bottom: 16px; border: 0; padding: 0; }
@@ -210,7 +211,7 @@ label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
   border: 1px solid var(--borda);
   font-size: 13px;
 }
-.badge.ok { background: #E6F5EE; border-color: var(--verde); color: var(--verde); }
+.badge.ok { background: #E6F5EE; border-color: var(--verde); color: var(--verde-700); }
 
 .vazio { text-align: center; padding: 48px 24px; }
 .vazio p { color: var(--cinza); margin-bottom: 16px; }
