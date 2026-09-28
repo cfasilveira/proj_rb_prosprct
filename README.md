@@ -74,11 +74,13 @@ docs/        # documentação do produto
 2. Variáveis de ambiente:
    - `DJANGO_SETTINGS_MODULE=config.settings.prod`
    - `DATABASE_URL` (fornecido pelo Postgres do Railway)
-   - `SECRET_KEY` (gerado)
+   - `SECRET_KEY` (gerar: `python -c "import secrets; print(secrets.token_urlsafe(50))"`)
    - `ALLOWED_HOSTS=seu-app.up.railway.app`
    - `CSRF_TRUSTED_ORIGINS=https://seu-app.up.railway.app`
-3. Build: `pip install -r requirements.txt && python backend/manage.py migrate && python backend/manage.py collectstatic --noinput`
-4. Start: `gunicorn config.wsgi:application --chdir backend --bind 0.0.0.0:$PORT`
+3. Build: `pip install -r requirements.txt && python backend/manage.py collectstatic --noinput`
+4. Start: `python backend/manage.py migrate && gunicorn config.wsgi:application --chdir backend --bind 0.0.0.0:$PORT`
+   (`migrate` no start, não no build: o build não alcança o Postgres e roda
+   antes da primeira provisão do banco)
 5. Segundo serviço (analytics): `streamlit run analytics/Home.py` com
    `requirements-analytics` do `analytics/requirements.txt`.
 6. Após o deploy: `python backend/manage.py criar_gestor ...`
