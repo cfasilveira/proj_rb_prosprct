@@ -1,4 +1,5 @@
 """Configurações base do RB Prospecta (comuns a dev e prod)."""
+from datetime import timedelta
 from pathlib import Path
 
 import dj_database_url
@@ -22,6 +23,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "axes",
     # apps locais
     "core",
     "accounts",
@@ -38,6 +40,7 @@ MIDDLEWARE = [
     "core.middleware.CurrentUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -97,6 +100,18 @@ LOGIN_REDIRECT_URL = "core:dashboard"
 LOGOUT_REDIRECT_URL = "accounts:login"
 
 SESSION_COOKIE_AGE = 60 * 60 * 24  # 24h (RNF/RF-01.2)
+
+# Força bruta no login (django-axes): 5 erros em 15 min bloqueiam por 15 min
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = timedelta(minutes=15)
+AXES_RESET_ON_SUCCESS = True
+# o formulário de login usa o campo "username" (AuthenticationForm) com rótulo "E-mail"
+AXES_USERNAME_FORM_FIELD = "username"
+AXES_LOCKOUT_TEMPLATE = "accounts/bloqueado.html"
 
 LOGGING = {
     "version": 1,

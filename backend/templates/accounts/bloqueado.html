@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Acesso bloqueado · RB Prospecta{% endblock %}
+{% block content %}
+<section class="card login-card">
+  <h1>Acesso temporariamente bloqueado</h1>
+  <p class="msg error">Foram registradas várias tentativas de login inválidas,
+  então o acesso foi bloqueado por um tempo.</p>
+  <p class="caption">Espere alguns minutos e tente novamente — ou fale com o
+  gestor do canal se precisar de ajuda.</p>
+  <a class="btn btn-secondary" href="{% url 'accounts:login' %}">← Voltar ao login</a>
+</section>
+{% endblock %}

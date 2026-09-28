@@ -200,6 +200,16 @@ Service Worker, 3) LGPD, 4) CI, 5) saúde/rate limit, 6) deploy + Lighthouse,
   responde **503** quando o banco não aceita conexão (contrato JSON
   original preservado); testes do caminho feliz e do 503
 
+### F3.5 · Força bruta no login (django-axes)
+
+- [x] `django-axes>=8` no `requirements.txt`; app, `AxesMiddleware` e
+  `AxesBackend` (antes do `ModelBackend`) em `base.py`
+- [x] 5 tentativas inválidas → **429** com página própria
+  (`accounts/bloqueado.html`); login válido zera o contador
+- [x] `AXES_USERNAME_FORM_FIELD = "username"`: o form usa o campo
+  `username` do `AuthenticationForm`, rotulado como “E-mail”
+- [x] testes `backend/tests/test_axes.py` (bloqueio e reset)
+
 ---
 
 ## Riscos do plano
