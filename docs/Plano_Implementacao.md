@@ -182,6 +182,18 @@ Service Worker, 3) LGPD, 4) CI, 5) saúde/rate limit, 6) deploy + Lighthouse,
 
 **Checkpoint F3.1+F3.2:** `ruff check . && pytest` verdes (125 testes).
 
+### F3.3 · CI e deploy
+
+- [x] README: `migrate` sai do build para o start (o build não alcança o
+  Postgres) e `SECRET_KEY` com o comando de geração
+- [x] `.github/workflows/ci.yml`: `ruff check` → `makemigrations --check` →
+  `check --deploy --fail-level WARNING` → `pytest` com cobertura, contra um
+  Postgres 16 como serviço
+- [x] `pytest-cov` no `requirements-dev.txt` (cobertura atual: 90%)
+
+**Checkpoint F3.3:** mesmos comandos do CI rodando verdes localmente
+(125 testes, 90% de cobertura).
+
 ---
 
 ## Riscos do plano

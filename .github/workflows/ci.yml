@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  qualidade:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: rb_prospecta
+          POSTGRES_PASSWORD: rb_prospecta
+          POSTGRES_DB: rb_prospecta_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      DATABASE_URL: postgres://rb_prospecta:rb_prospecta@localhost:5432/rb_prospecta_test
+      SECRET_KEY: ci-secret-key-so-para-o-check-deploy-4b91f0c7d2e6a85f317c
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Instalar dependências
+        run: pip install -r requirements-dev.txt
+
+      - name: Ruff
+        run: ruff check .
+
+      - name: Migrations pendentes
+        run: python backend/manage.py makemigrations --check --dry-run
+
+      - name: Verificação de segurança (prod)
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.prod
+          ALLOWED_HOSTS: ci.example.com
+          CSRF_TRUSTED_ORIGINS: https://ci.example.com
+        run: python backend/manage.py check --deploy --fail-level WARNING
+
+      - name: Testes
+        run: pytest --cov=backend --cov=analytics --cov-report=term-missing --cov-report=xml
