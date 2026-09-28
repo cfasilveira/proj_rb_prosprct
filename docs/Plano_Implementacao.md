@@ -210,6 +210,15 @@ Service Worker, 3) LGPD, 4) CI, 5) saúde/rate limit, 6) deploy + Lighthouse,
   `username` do `AuthenticationForm`, rotulado como “E-mail”
 - [x] testes `backend/tests/test_axes.py` (bloqueio e reset)
 
+### F3.6 · Erros em produção (Sentry, opcional)
+
+- [x] `sentry-sdk[django]` no `requirements.txt`; `config/sentry.py` com
+  `configura_sentry()`, chamada ao final de `settings/prod.py`
+- [x] só inicializa com `SENTRY_DSN` no ambiente — sem a variável não há
+  efeito nem dependência de rede; `SENTRY_TRACES_SAMPLE_RATE` controla o
+  sample (default `0`)
+- [x] testes `backend/tests/test_sentry.py` (com e sem DSN)
+
 ---
 
 ## Riscos do plano

@@ -77,6 +77,8 @@ docs/        # documentação do produto
    - `SECRET_KEY` (gerar: `python -c "import secrets; print(secrets.token_urlsafe(50))"`)
    - `ALLOWED_HOSTS=seu-app.up.railway.app`
    - `CSRF_TRUSTED_ORIGINS=https://seu-app.up.railway.app`
+   - `SENTRY_DSN` (opcional — sem ela o Sentry fica desligado e o servidor
+     sobe normalmente)
 3. Build: `pip install -r requirements.txt && python backend/manage.py collectstatic --noinput`
 4. Start: `python backend/manage.py migrate && gunicorn config.wsgi:application --chdir backend --bind 0.0.0.0:$PORT`
    (`migrate` no start, não no build: o build não alcança o Postgres e roda

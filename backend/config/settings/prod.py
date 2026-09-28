@@ -1,6 +1,8 @@
 """Configurações de produção."""
 import os
 
+from config.sentry import configura_sentry
+
 from .base import *  # noqa: F403
 
 DEBUG = False
@@ -19,3 +21,6 @@ SECURE_HSTS_PRELOAD = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
+
+# Erros em produção: só entra se SENTRY_DSN estiver no ambiente
+configura_sentry()
