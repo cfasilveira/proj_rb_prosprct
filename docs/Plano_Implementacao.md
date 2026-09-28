@@ -194,6 +194,12 @@ Service Worker, 3) LGPD, 4) CI, 5) saúde/rate limit, 6) deploy + Lighthouse,
 **Checkpoint F3.3:** mesmos comandos do CI rodando verdes localmente
 (125 testes, 90% de cobertura).
 
+### F3.4 · Saúde do serviço
+
+- [x] `/saude/` deixa de ser uma lamberta “ok”: consulta `SELECT 1` e
+  responde **503** quando o banco não aceita conexão (contrato JSON
+  original preservado); testes do caminho feliz e do 503
+
 ---
 
 ## Riscos do plano

@@ -2,7 +2,8 @@
 from datetime import datetime, timedelta
 
 from django.contrib.auth.decorators import login_required
-from django.http import HttpRequest, HttpResponse
+from django.db import DatabaseError, connection
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -118,3 +119,13 @@ def service_worker(request: HttpRequest) -> HttpResponse:
     return HttpResponse(
         render_to_string("sw.js"), content_type="application/javascript; charset=utf-8"
     )
+
+
+def saude(request: HttpRequest) -> JsonResponse:
+    """Health check do serviço: responde só se o banco aceitar conexão."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+    except DatabaseError:
+        return JsonResponse({"status": "erro", "banco": "indisponivel"}, status=503)
+    return JsonResponse({"status": "ok"})
