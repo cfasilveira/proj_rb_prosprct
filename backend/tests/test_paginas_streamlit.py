@@ -111,6 +111,29 @@ def test_pagina_oferece_exportacao_csv_e_pdf(pagina):
     ]
 
 
+def test_home_autentica_gestor_pelo_formulario(django_user_model):
+    """O login do analytics valida contra `auth_user` (RF-06.3) sem quebrar.
+
+    Regressão do F3.5: `AxesBackend` exige um `request`, e a tela estourava
+    `AxesBackendRequestParameterRequired` em vez de autenticar.
+    """
+    user = django_user_model.objects.create_user(
+        email="gestor@app.com", password="Segredo123", username="gestor_app"
+    )
+    user.perfil.role = "gestor"
+    user.perfil.save()
+
+    at = AppTest.from_file(RAIZ / "analytics" / "Home.py", default_timeout=60)
+    at.run()
+    at.text_input[0].set_value("gestor@app.com")
+    at.text_input[1].set_value("Segredo123")
+    at.button[0].click()
+    at.run()
+
+    assert [str(exc.value) for exc in at.exception] == []
+    assert at.session_state["gestor"] == "gestor@app.com"
+
+
 def test_home_gera_o_relatorio_completo_a1_a4():
     at = AppTest.from_file(RAIZ / "analytics" / "Home.py", default_timeout=120)
     at.session_state["gestor"] = "gestor@test.com"

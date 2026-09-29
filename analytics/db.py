@@ -68,13 +68,36 @@ def configura_django_auth():
     django.setup()
 
 
-def autentica_gestor(email: str, senha: str) -> bool:
-    """Valida credenciais e exige perfil de gestor ativo."""
-    configura_django_auth()
-    from django.contrib.auth import authenticate
+IP_ANALYTICS = "127.0.0.1"
 
-    user = authenticate(username=email, password=senha)
+
+def autentica_gestor(email: str, senha: str) -> bool:
+    """Valida credenciais e exige perfil de gestor ativo.
+
+    O `AxesBackend` (F3.5) recusa `authenticate()` sem `request` — ele precisa
+    do IP/user agent para contar as tentativas. O Streamlit não tem um request
+    HTTP de verdade, então monta um mínimo: o lockout do analytics passa a ser
+    por IP fixo (127.0.0.1), separado do IP real dos acessos ao Django.
+    """
+    configura_django_auth()
+    from django.conf import settings
+    from django.contrib.auth import authenticate
+    from django.http import HttpRequest
+
+    request = HttpRequest()
+    request.META["REMOTE_ADDR"] = IP_ANALYTICS
+
+    user = authenticate(request=request, username=email, password=senha)
     if not user:
         return False
     perfil = getattr(user, "perfil", None)
-    return bool(perfil and perfil.is_gestor and perfil.ativo)
+    if not (perfil and perfil.is_gestor and perfil.ativo):
+        return False
+    if settings.AXES_RESET_ON_SUCCESS:
+        # O Streamlit nunca chama login(), então o sinal `user_logged_in` (que
+        # zera o contador do axes) não dispara: zera aqui, senão as falhas
+        # antigas continuam contando para o próximo lockout do gestor.
+        from axes.utils import reset
+
+        reset(ip=IP_ANALYTICS, username=email)
+    return True
