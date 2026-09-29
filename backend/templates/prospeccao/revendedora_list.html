@@ -10,6 +10,7 @@
 </div>
 
 {% if revendedoras %}
+<div class="tabela-scroll">
 <table class="tabela">
   <thead>
     <tr><th>Nome</th><th>Cidade</th><th>Promotora</th><th>Já revende</th><th>Cadastro</th><th></th></tr>
@@ -17,11 +18,11 @@
   <tbody>
     {% for r in revendedoras %}
     <tr>
-      <td><a href="{% url 'prospeccao:revendedora_detail' r.pk %}">{{ r.nome_completo }}</a></td>
-      <td>{{ r.cidade }}</td>
-      <td>{{ r.promotora.perfil.nome_completo }}</td>
-      <td>{% if r.ja_revende %}<span class="badge ok">sim</span>{% else %}<span class="badge">não</span>{% endif %}</td>
-      <td>{{ r.criado_em|date:"d/m/Y H:mm" }}</td>
+      <td data-label="Nome"><a href="{% url 'prospeccao:revendedora_detail' r.pk %}">{{ r.nome_completo }}</a></td>
+      <td data-label="Cidade">{{ r.cidade }}</td>
+      <td data-label="Promotora">{{ r.promotora.perfil.nome_completo }}</td>
+      <td data-label="Já revende">{% if r.ja_revende %}<span class="badge ok">sim</span>{% else %}<span class="badge">não</span>{% endif %}</td>
+      <td data-label="Cadastro">{{ r.criado_em|date:"d/m/Y H:mm" }}</td>
       <td class="acoes">
         <a class="btn btn-ghost-dark btn-sm" href="{% url 'prospeccao:revendedora_nova' %}?editar={{ r.pk }}">Editar</a>
         <a class="btn btn-ghost-dark btn-sm" href="{% url 'prospeccao:revendedora_delete' r.pk %}">Excluir</a>
@@ -30,6 +31,7 @@
     {% endfor %}
   </tbody>
 </table>
+</div>
 {% else %}
 <div class="vazio card">
   <p>Nenhuma revendedora ainda.</p>

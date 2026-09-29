@@ -8,6 +8,7 @@
 
 <section class="card">
   {% if promotoras %}
+  <div class="tabela-scroll">
   <table class="tabela">
     <thead>
       <tr><th>Nome</th><th>E-mail</th><th>Território</th><th>Cadastradas</th><th>Status</th><th></th></tr>
@@ -15,11 +16,11 @@
     <tbody>
       {% for p in promotoras %}
       <tr>
-        <td>{{ p.nome_completo }}</td>
-        <td>{{ p.user.email }}</td>
-        <td>{{ p.territorio|default:"—" }}</td>
-        <td>{{ p.total }} <span class="caption">({{ p.ativas }} ativas)</span></td>
-        <td>
+        <td data-label="Nome">{{ p.nome_completo }}</td>
+        <td data-label="E-mail">{{ p.user.email }}</td>
+        <td data-label="Território">{{ p.territorio|default:"—" }}</td>
+        <td data-label="Cadastradas">{{ p.total }} <span class="caption">({{ p.ativas }} ativas)</span></td>
+        <td data-label="Status">
           {% if p.ativo %}<span class="badge ok">ativa</span>{% else %}<span class="badge">desativada</span>{% endif %}
         </td>
         <td class="acoes">
@@ -35,6 +36,7 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
   {% else %}
   <div class="vazio">
     <p>Nenhuma promotora cadastrada.</p>

@@ -55,6 +55,7 @@
   </p>
   {% endif %}
 
+  <div class="tabela-scroll">
   <table class="tabela">
     <thead>
       <tr>
@@ -65,18 +66,19 @@
     <tbody>
       {% for r in resultados %}
       <tr>
-        <td>{{ r.numero }}</td>
-        <td>{% if r.ok %}<span class="badge ok">ok</span>{% else %}<span class="badge">erro</span>{% endif %}</td>
-        <td>{{ r.resumo.nome }}</td>
-        <td>{{ r.resumo.telefone }}</td>
-        <td>{{ r.resumo.cidade }}</td>
-        <td>{{ r.resumo.interesses|default:"—" }}</td>
-        <td>{% if r.resumo.ja_revende == "sim" %}<span class="badge ok">sim</span>{% else %}<span class="badge">não</span>{% endif %}</td>
-        <td class="field-error">{% if r.erros %}{{ r.erros|join:"; " }}{% else %}—{% endif %}</td>
+        <td data-label="Linha">{{ r.numero }}</td>
+        <td data-label="Status">{% if r.ok %}<span class="badge ok">ok</span>{% else %}<span class="badge">erro</span>{% endif %}</td>
+        <td data-label="Nome">{{ r.resumo.nome }}</td>
+        <td data-label="Telefone">{{ r.resumo.telefone }}</td>
+        <td data-label="Cidade">{{ r.resumo.cidade }}</td>
+        <td data-label="Interesses">{{ r.resumo.interesses|default:"—" }}</td>
+        <td data-label="Já revende">{% if r.resumo.ja_revende == "sim" %}<span class="badge ok">sim</span>{% else %}<span class="badge">não</span>{% endif %}</td>
+        <td data-label="Problemas" class="field-error">{% if r.erros %}{{ r.erros|join:"; " }}{% else %}—{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
+  </div>
 
   <form method="post" action="" class="wizard-nav">
     {% csrf_token %}

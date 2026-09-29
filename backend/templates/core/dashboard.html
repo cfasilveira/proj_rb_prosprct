@@ -41,6 +41,7 @@
 <section class="card">
   <h2>Cadastro por promotora</h2>
   {% if por_promotora %}
+  <div class="tabela-scroll">
   <table class="tabela">
     <thead>
       <tr><th>Promotora</th><th>Território</th><th>Cadastradas</th><th>Já revendem</th><th>Conversão</th></tr>
@@ -48,18 +49,19 @@
     <tbody>
       {% for linha in por_promotora %}
       <tr>
-        <td>
+        <td data-label="Promotora">
           {{ linha.promotora__perfil__nome_completo }}
           {% if not linha.promotora__perfil__ativo %}<span class="badge">inativa</span>{% endif %}
         </td>
-        <td>{{ linha.promotora__perfil__territorio|default:"—" }}</td>
-        <td>{{ linha.total }}</td>
-        <td>{{ linha.ja_revendem }}</td>
-        <td>{{ linha.pct }}%</td>
+        <td data-label="Território">{{ linha.promotora__perfil__territorio|default:"—" }}</td>
+        <td data-label="Cadastradas">{{ linha.total }}</td>
+        <td data-label="Já revendem">{{ linha.ja_revendem }}</td>
+        <td data-label="Conversão">{{ linha.pct }}%</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
+  </div>
   {% else %}
   <p class="caption">Nenhuma revendedora cadastrada ainda.</p>
   {% endif %}
@@ -75,19 +77,21 @@
     </span>
   </div>
   {% if ultimos %}
+  <div class="tabela-scroll">
   <table class="tabela">
     <thead><tr><th>Nome</th><th>Cidade</th><th>Já revende</th><th>Cadastro</th></tr></thead>
     <tbody>
       {% for r in ultimos %}
       <tr>
-        <td><a href="{% url 'prospeccao:revendedora_detail' r.pk %}">{{ r.nome_completo }}</a></td>
-        <td>{{ r.cidade }}</td>
-        <td>{% if r.ja_revende %}<span class="badge ok">sim</span>{% else %}<span class="badge">não</span>{% endif %}</td>
-        <td>{{ r.criado_em|date:"d/m/Y H:mm" }}</td>
+        <td data-label="Nome"><a href="{% url 'prospeccao:revendedora_detail' r.pk %}">{{ r.nome_completo }}</a></td>
+        <td data-label="Cidade">{{ r.cidade }}</td>
+        <td data-label="Já revende">{% if r.ja_revende %}<span class="badge ok">sim</span>{% else %}<span class="badge">não</span>{% endif %}</td>
+        <td data-label="Cadastro">{{ r.criado_em|date:"d/m/Y H:mm" }}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
+  </div>
   {% else %}
   <div class="vazio">
     <p>Nenhuma revendedora ainda.</p>

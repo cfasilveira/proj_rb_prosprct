@@ -111,6 +111,14 @@ def test_pagina_oferece_exportacao_csv_e_pdf(pagina):
     ]
 
 
+@pytest.mark.parametrize("pagina", PAGINAS)
+def test_pagina_injeta_css_de_celular(pagina):
+    """No celular as 3 colunas de KPI empilham em vez de espremer (brief §4)."""
+    at = _executa(pagina)
+    assert [str(exc.value) for exc in at.exception] == []
+    assert any("max-width: 640px" in str(m.value) for m in at.markdown)
+
+
 def test_home_autentica_gestor_pelo_formulario(django_user_model):
     """O login do analytics valida contra `auth_user` (RF-06.3) sem quebrar.
 

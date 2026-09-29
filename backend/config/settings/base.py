@@ -6,7 +6,8 @@ import dj_database_url
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-load_dotenv(BASE_DIR / ".env")
+# O .env fica na raiz do repositório (README: cp .env.example .env); BASE_DIR é backend/
+load_dotenv(BASE_DIR.parent / ".env")
 
 SECRET_KEY = __import__("os").environ.get(
     "SECRET_KEY", "dev-insecure-key-troque-em-producao"

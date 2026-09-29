@@ -9,6 +9,25 @@ import relatorio
 
 PERIODOS = {"Sempre": None, "Hoje": 1, "7 dias": 7, "30 dias": 30}
 
+# Celular (360–640px): o Streamlit empilha os blocos, mas deixa as 3 colunas de
+# KPI lado a lado espremidas — aqui elas viram cartões empilhados (brief §4).
+CSS_CELULAR = """
+<style>
+@media (max-width: 640px) {
+  [data-testid="stHorizontalBlock"] { flex-wrap: wrap; }
+  [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+</style>
+"""
+
+
+def css_celular():
+    """Aplica os ajustes de tela estreita às páginas de análise."""
+    st.markdown(CSS_CELULAR, unsafe_allow_html=True)
+
 
 def sidebar_filtros() -> dict:
     """Filtros laterais comuns → parâmetros das queries."""
@@ -93,6 +112,7 @@ def kpi(coluna, rotulo: str, valor, destaque: bool = False):
 
 def protege_pagina():
     """Interrompe a página se não houver sessão de gestor."""
+    css_celular()
     if "gestor" not in st.session_state:
         st.warning("Faça login na página inicial para ver as análises.")
         st.page_link("Home.py", label="Ir para o login", icon="🔐")
